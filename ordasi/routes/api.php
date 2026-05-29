@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BrandController;
+use App\Http\Controllers\Api\V1\CartController;
+use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\BusinessController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\SubcategoryController;
@@ -59,6 +61,23 @@ Route::prefix('v1')->group(function () {
         // Empresa (registro único)
         Route::get('business', [BusinessController::class, 'show'])->name('business.show');
         Route::put('business', [BusinessController::class, 'update'])->name('business.update');
+
+        // Carrito (usuario autenticado)
+        Route::get('cart', [CartController::class, 'show'])->name('cart.show');
+        Route::post('cart/items', [CartController::class, 'addItem'])->name('cart.items.add');
+        Route::patch('cart/items/{item}', [CartController::class, 'updateItem'])->name('cart.items.update');
+        Route::delete('cart/items/{item}', [CartController::class, 'removeItem'])->name('cart.items.remove');
+        Route::delete('cart', [CartController::class, 'clear'])->name('cart.clear');
+
+        // Órdenes del cliente
+        Route::post('orders', [OrderController::class, 'store'])->name('orders.store');
+        Route::get('my-orders', [OrderController::class, 'myOrders'])->name('orders.mine');
+        Route::get('my-orders/{order}', [OrderController::class, 'myShow'])->name('orders.mine.show');
+
+        // Órdenes (gestión admin)
+        Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
 
         // Dashboard
         Route::get('stats', [StatsController::class, 'index'])->name('stats.index');

@@ -35,6 +35,8 @@ class PermissionsTableSeeder extends Seeder
             'purchases.index', 'purchases.show', 'purchases.create',
             // Ventas
             'sales.index', 'sales.show', 'sales.create', 'sales.print',
+            // Órdenes (e-commerce)
+            'orders.index', 'orders.show', 'orders.edit',
             // PDFs
             'purchases.pdf', 'sales.pdf',
             // Empresa
