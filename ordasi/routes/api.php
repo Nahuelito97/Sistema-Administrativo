@@ -5,9 +5,11 @@ use App\Http\Controllers\Api\V1\BrandController;
 use App\Http\Controllers\Api\V1\CartController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\PaymentController;
+use App\Http\Controllers\Api\V1\PostController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\PromotionController;
 use App\Http\Controllers\Api\V1\RatingController;
+use App\Http\Controllers\Api\V1\TagController;
 use App\Http\Controllers\Api\V1\BusinessController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\SubcategoryController;
@@ -30,6 +32,10 @@ Route::prefix('v1')->group(function () {
     // Webhook de MercadoPago (lo llama MP, sin token)
     Route::post('webhooks/mercadopago', [PaymentController::class, 'webhook'])->name('webhooks.mercadopago');
 
+    // Blog público (storefront)
+    Route::get('blog', [PostController::class, 'publicIndex'])->name('blog.index');
+    Route::get('blog/{post:slug}', [PostController::class, 'publicShow'])->name('blog.show');
+
     // Protegido por token Sanctum (los permisos can: se aplican en cada controller)
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', [AuthController::class, 'me'])->name('api.me');
@@ -44,6 +50,11 @@ Route::prefix('v1')->group(function () {
         // Reseñas de producto
         Route::get('products/{product}/ratings', [RatingController::class, 'index'])->name('products.ratings.index');
         Route::post('products/{product}/ratings', [RatingController::class, 'store'])->name('products.ratings.store');
+        // Blog y etiquetas (admin)
+        Route::apiResource('tags', TagController::class);
+        Route::post('posts/{post}/image', [PostController::class, 'uploadImage'])->name('posts.image');
+        Route::apiResource('posts', PostController::class);
+
         // Perfil del usuario autenticado
         Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
         Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');

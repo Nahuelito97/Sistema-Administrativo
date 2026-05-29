@@ -51,6 +51,11 @@ class Product extends Model
         return $this->morphMany(Image::class, 'imageable');
     }
 
+    public function tags()
+    {
+        return $this->morphToMany(Tag::class, 'taggable');
+    }
+
     public function promotions()
     {
         return $this->belongsToMany(Promotion::class);
