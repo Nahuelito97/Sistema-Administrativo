@@ -12,7 +12,7 @@ use App\PurchaseDetails;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
-use Barryvdh\DomPDF\Facade as PDF;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 
 
 class PurchaseController extends Controller

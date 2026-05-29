@@ -1,0 +1,41 @@
+services:
+  app:
+    build: .
+    container_name: ordasi_app
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      bash -c "
+      composer install --no-interaction --prefer-dist &&
+      php artisan key:generate --force &&
+      php artisan migrate --force &&
+      php artisan db:seed --force &&
+      php artisan serve --host 0.0.0.0 --port 8000
+      "
+
+  db:
+    image: mysql:8.0
+    container_name: ordasi_db
+    environment:
+      MYSQL_DATABASE: ordasi
+      MYSQL_USER: ordasi
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: rootsecret
+    ports:
+      - "3307:3306"
+    volumes:
+      - ordasi_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-prootsecret"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  ordasi_db_data:

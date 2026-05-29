@@ -8,18 +8,18 @@ use Illuminate\Http\Request;
 use App\Http\Requests\Product\StoreRequest;
 use App\Http\Requests\Product\UpdateRequest;
 use App\Provider;
-use Barryvdh\DomPDF\Facade as PDF;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 
 class ProductController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('can:product.create')->only(['create','store']);
-        $this->middleware('can:product.index')->only(['index']);
-        $this->middleware('can:product.edit')->only(['edit','update']);
-        $this->middleware('can:product.show')->only(['show']);
-        $this->middleware('can:product.destroy')->only(['destroy']);
+        $this->middleware('can:products.create')->only(['create','store']);
+        $this->middleware('can:products.index')->only(['index']);
+        $this->middleware('can:products.edit')->only(['edit','update']);
+        $this->middleware('can:products.show')->only(['show']);
+        $this->middleware('can:products.destroy')->only(['destroy']);
 
         $this->middleware('can:change.status.products')->only(['change_status']);
 
@@ -39,6 +39,7 @@ class ProductController extends Controller
     }
     public function store(StoreRequest $request)
     {
+        $image_name = null;
         if($request->hasFile('picture')){
             $file = $request->file('picture');
             $image_name = time().'_'.$file->getClientOriginalName();
@@ -66,6 +67,7 @@ class ProductController extends Controller
     }
     public function update(UpdateRequest $request, Product $product)
     {
+        $image_name = $product->image;
         if($request->hasFile('picture')){
             $file = $request->file('picture');
             $image_name = time().'_'.$file->getClientOriginalName();
