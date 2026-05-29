@@ -1,12 +1,18 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\BusinessController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\ClientController;
+use App\Http\Controllers\Api\V1\PermissionController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\ProviderController;
 use App\Http\Controllers\Api\V1\PurchaseController;
+use App\Http\Controllers\Api\V1\ReportController;
+use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\SaleController;
+use App\Http\Controllers\Api\V1\StatsController;
+use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -19,6 +25,7 @@ Route::prefix('v1')->group(function () {
         Route::get('me', [AuthController::class, 'me'])->name('api.me');
         Route::post('logout', [AuthController::class, 'logout'])->name('api.logout');
 
+        // Catálogo
         Route::apiResource('categories', CategoryController::class);
         Route::apiResource('providers', ProviderController::class);
         Route::apiResource('clients', ClientController::class);
@@ -27,5 +34,20 @@ Route::prefix('v1')->group(function () {
         // Ventas y compras: solo listar, ver y crear (igual que el panel admin)
         Route::apiResource('sales', SaleController::class)->only(['index', 'show', 'store']);
         Route::apiResource('purchases', PurchaseController::class)->only(['index', 'show', 'store']);
+
+        // Administración
+        Route::apiResource('users', UserController::class);
+        Route::apiResource('roles', RoleController::class);
+        Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
+
+        // Reportes
+        Route::get('reports/sales', [ReportController::class, 'sales'])->name('reports.sales');
+
+        // Empresa (registro único)
+        Route::get('business', [BusinessController::class, 'show'])->name('business.show');
+        Route::put('business', [BusinessController::class, 'update'])->name('business.update');
+
+        // Dashboard
+        Route::get('stats', [StatsController::class, 'index'])->name('stats.index');
     });
 });
