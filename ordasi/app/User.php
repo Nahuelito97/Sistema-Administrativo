@@ -67,4 +67,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(ShoppingCart::class);
     }
+
+    public function profile()
+    {
+        return $this->hasOne(Profile::class);
+    }
 }

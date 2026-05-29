@@ -50,4 +50,40 @@ class Product extends Model
     {
         return $this->morphMany(Image::class, 'imageable');
     }
+
+    public function promotions()
+    {
+        return $this->belongsToMany(Promotion::class);
+    }
+
+    public function ratings()
+    {
+        return $this->morphMany(Rating::class, 'rateable');
+    }
+
+    /** Promociones vigentes (entre start y ending date). */
+    public function activePromotions()
+    {
+        $now = now();
+        return $this->promotions->filter(fn ($p) => $p->start_date <= $now && $p->ending_date >= $now);
+    }
+
+    /** Precio final aplicando las promociones vigentes. */
+    public function getDiscountedPriceAttribute(): float
+    {
+        $price = (float) $this->sell_price;
+        foreach ($this->activePromotions() as $promotion) {
+            if ($promotion->promotion_type === 'percent') {
+                $price -= $price * ((float) $promotion->discount_rate / 100);
+            } else {
+                $price -= (float) $promotion->fixed_amount_discount;
+            }
+        }
+        return round(max($price, 0), 2);
+    }
+
+    public function getHasPromotionAttribute(): bool
+    {
+        return $this->relationLoaded('promotions') && $this->activePromotions()->isNotEmpty();
+    }
 }

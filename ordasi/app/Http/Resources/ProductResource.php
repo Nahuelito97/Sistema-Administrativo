@@ -31,6 +31,11 @@ class ProductResource extends JsonResource
             'provider'          => new ProviderResource($this->whenLoaded('provider')),
             'brand'             => new BrandResource($this->whenLoaded('brand')),
             'images'            => ImageResource::collection($this->whenLoaded('images')),
+            'promotions'        => PromotionResource::collection($this->whenLoaded('promotions')),
+            'discounted_price'  => $this->when($this->relationLoaded('promotions'), fn () => $this->discounted_price),
+            'has_promotion'     => $this->has_promotion,
+            'average_rating'    => $this->when($this->relationLoaded('ratings'), fn () => round((float) $this->ratings->avg('rating'), 1)),
+            'ratings_count'     => $this->when($this->relationLoaded('ratings'), fn () => $this->ratings->count()),
             'created_at'        => $this->created_at,
         ];
     }

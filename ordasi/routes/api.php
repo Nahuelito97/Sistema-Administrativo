@@ -5,6 +5,9 @@ use App\Http\Controllers\Api\V1\BrandController;
 use App\Http\Controllers\Api\V1\CartController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\PaymentController;
+use App\Http\Controllers\Api\V1\ProfileController;
+use App\Http\Controllers\Api\V1\PromotionController;
+use App\Http\Controllers\Api\V1\RatingController;
 use App\Http\Controllers\Api\V1\BusinessController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\SubcategoryController;
@@ -36,7 +39,14 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('categories', CategoryController::class);
         Route::apiResource('subcategories', SubcategoryController::class);
         Route::apiResource('brands', BrandController::class);
+        Route::apiResource('promotions', PromotionController::class);
         Route::apiResource('providers', ProviderController::class);
+        // Reseñas de producto
+        Route::get('products/{product}/ratings', [RatingController::class, 'index'])->name('products.ratings.index');
+        Route::post('products/{product}/ratings', [RatingController::class, 'store'])->name('products.ratings.store');
+        // Perfil del usuario autenticado
+        Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
+        Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::get('products/barcodes/pdf', [ProductController::class, 'barcodesPdf'])->name('products.barcodes');
         Route::patch('products/{product}/status', [ProductController::class, 'changeStatus'])->name('products.status');
         Route::post('products/{product}/images', [ProductController::class, 'uploadImages'])->name('products.images.store');

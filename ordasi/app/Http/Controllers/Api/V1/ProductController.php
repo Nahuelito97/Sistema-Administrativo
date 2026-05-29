@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
-    public const RELATIONS = ['category', 'subcategory', 'provider', 'brand', 'images'];
+    public const RELATIONS = ['category', 'subcategory', 'provider', 'brand', 'images', 'promotions', 'ratings.user'];
 
     public function __construct()
     {
@@ -27,7 +27,7 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'provider', 'brand']);
+        $query = Product::with(['category', 'provider', 'brand', 'promotions']);
         if ($s = $request->query('search')) {
             $query->where(fn ($q) => $q->where('name', 'like', "%{$s}%")->orWhere('code', 'like', "%{$s}%"));
         }

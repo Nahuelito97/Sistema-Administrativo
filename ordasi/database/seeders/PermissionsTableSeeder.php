@@ -25,6 +25,8 @@ class PermissionsTableSeeder extends Seeder
             'subcategories.index', 'subcategories.show', 'subcategories.edit', 'subcategories.create', 'subcategories.destroy',
             // Marcas
             'brands.index', 'brands.show', 'brands.edit', 'brands.create', 'brands.destroy',
+            // Promociones
+            'promotions.index', 'promotions.show', 'promotions.edit', 'promotions.create', 'promotions.destroy',
             // Clientes
             'clients.index', 'clients.show', 'clients.edit', 'clients.create', 'clients.destroy',
             // Productos
