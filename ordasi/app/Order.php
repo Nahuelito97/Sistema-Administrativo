@@ -9,6 +9,7 @@ class Order extends Model
     protected $fillable = [
         'user_id', 'order_date', 'tax', 'total',
         'shipping_status', 'payment_status', 'shipping_address',
+        'payment_platform', 'preference_id', 'payment_id',
     ];
 
     protected $casts = ['order_date' => 'datetime'];

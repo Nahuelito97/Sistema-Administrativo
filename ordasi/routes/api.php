@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BrandController;
 use App\Http\Controllers\Api\V1\CartController;
 use App\Http\Controllers\Api\V1\OrderController;
+use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\BusinessController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\SubcategoryController;
@@ -23,6 +24,8 @@ Route::prefix('v1')->group(function () {
 
     // Público
     Route::post('login', [AuthController::class, 'login'])->name('api.login');
+    // Webhook de MercadoPago (lo llama MP, sin token)
+    Route::post('webhooks/mercadopago', [PaymentController::class, 'webhook'])->name('webhooks.mercadopago');
 
     // Protegido por token Sanctum (los permisos can: se aplican en cada controller)
     Route::middleware('auth:sanctum')->group(function () {
@@ -73,6 +76,7 @@ Route::prefix('v1')->group(function () {
         Route::post('orders', [OrderController::class, 'store'])->name('orders.store');
         Route::get('my-orders', [OrderController::class, 'myOrders'])->name('orders.mine');
         Route::get('my-orders/{order}', [OrderController::class, 'myShow'])->name('orders.mine.show');
+        Route::post('orders/{order}/pay', [PaymentController::class, 'pay'])->name('orders.pay');
 
         // Órdenes (gestión admin)
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');

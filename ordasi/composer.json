@@ -12,6 +12,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "laravel/ui": "^4",
+        "mercadopago/dx-php": "^3",
         "mfonte/laravel-collective-html": "^1.0",
         "mike42/escpos-php": "^4",
         "milon/barcode": "^13.1",

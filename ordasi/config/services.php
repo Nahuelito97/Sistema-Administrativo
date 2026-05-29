@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'mercadopago' => [
+        'access_token' => env('MERCADOPAGO_ACCESS_TOKEN'),
+        'public_key' => env('MERCADOPAGO_PUBLIC_KEY'),
+        // URL del storefront (front React) para los back_urls del checkout
+        'front_url' => env('STOREFRONT_URL', 'http://localhost:5174'),
+    ],
+
 ];
