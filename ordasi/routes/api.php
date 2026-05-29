@@ -3,7 +3,12 @@
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BrandController;
 use App\Http\Controllers\Api\V1\CartController;
+use App\Http\Controllers\Api\V1\CurrencyController;
 use App\Http\Controllers\Api\V1\OrderController;
+use App\Http\Controllers\Api\V1\SettingController;
+use App\Http\Controllers\Api\V1\SliderController;
+use App\Http\Controllers\Api\V1\SocialMediaController;
+use App\Http\Controllers\Api\V1\SubscriptionController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\PostController;
 use App\Http\Controllers\Api\V1\ProfileController;
@@ -36,6 +41,12 @@ Route::prefix('v1')->group(function () {
     Route::get('blog', [PostController::class, 'publicIndex'])->name('blog.index');
     Route::get('blog/{post:slug}', [PostController::class, 'publicShow'])->name('blog.show');
 
+    // Contenido público del storefront
+    Route::get('public/sliders', [SliderController::class, 'publicIndex'])->name('public.sliders');
+    Route::get('public/social-media', [SocialMediaController::class, 'publicIndex'])->name('public.social');
+    Route::get('public/settings', [SettingController::class, 'publicIndex'])->name('public.settings');
+    Route::post('subscribe', [SubscriptionController::class, 'store'])->name('subscribe');
+
     // Protegido por token Sanctum (los permisos can: se aplican en cada controller)
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', [AuthController::class, 'me'])->name('api.me');
@@ -54,6 +65,16 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('tags', TagController::class);
         Route::post('posts/{post}/image', [PostController::class, 'uploadImage'])->name('posts.image');
         Route::apiResource('posts', PostController::class);
+
+        // Contenido del sitio (admin)
+        Route::post('sliders/{slider}/image', [SliderController::class, 'uploadImage'])->name('sliders.image');
+        Route::apiResource('sliders', SliderController::class);
+        Route::apiResource('social-media', SocialMediaController::class)->parameters(['social-media' => 'social']);
+        Route::get('subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+        Route::delete('subscriptions/{subscription}', [SubscriptionController::class, 'destroy'])->name('subscriptions.destroy');
+        Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
+        Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
+        Route::apiResource('currencies', CurrencyController::class);
 
         // Perfil del usuario autenticado
         Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');

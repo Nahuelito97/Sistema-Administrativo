@@ -30,6 +30,12 @@ class PermissionsTableSeeder extends Seeder
             // Blog (posts) y etiquetas
             'posts.index', 'posts.show', 'posts.edit', 'posts.create', 'posts.destroy',
             'tags.index', 'tags.show', 'tags.edit', 'tags.create', 'tags.destroy',
+            // Contenido del sitio
+            'sliders.index', 'sliders.show', 'sliders.edit', 'sliders.create', 'sliders.destroy',
+            'social.index', 'social.show', 'social.edit', 'social.create', 'social.destroy',
+            'subscriptions.index', 'subscriptions.destroy',
+            'settings.index', 'settings.edit',
+            'currencies.index', 'currencies.show', 'currencies.edit', 'currencies.create', 'currencies.destroy',
             // Clientes
             'clients.index', 'clients.show', 'clients.edit', 'clients.create', 'clients.destroy',
             // Productos
