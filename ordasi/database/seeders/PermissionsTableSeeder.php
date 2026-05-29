@@ -21,6 +21,10 @@ class PermissionsTableSeeder extends Seeder
             'roles.index', 'roles.show', 'roles.create', 'roles.edit', 'roles.destroy',
             // Categorías
             'categories.index', 'categories.show', 'categories.edit', 'categories.create', 'categories.destroy',
+            // Subcategorías
+            'subcategories.index', 'subcategories.show', 'subcategories.edit', 'subcategories.create', 'subcategories.destroy',
+            // Marcas
+            'brands.index', 'brands.show', 'brands.edit', 'brands.create', 'brands.destroy',
             // Clientes
             'clients.index', 'clients.show', 'clients.edit', 'clients.create', 'clients.destroy',
             // Productos

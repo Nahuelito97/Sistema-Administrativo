@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Image;
 use App\Product;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Product\StoreRequest;
@@ -9,21 +10,24 @@ use App\Http\Requests\Product\UpdateRequest;
 use App\Http\Resources\ProductResource;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
+    public const RELATIONS = ['category', 'subcategory', 'provider', 'brand', 'images'];
+
     public function __construct()
     {
         $this->middleware('can:products.index')->only(['index', 'show']);
-        $this->middleware('can:products.create')->only(['store']);
-        $this->middleware('can:products.edit')->only(['update']);
+        $this->middleware('can:products.create')->only(['store', 'uploadImages']);
+        $this->middleware('can:products.edit')->only(['update', 'uploadImages', 'deleteImage']);
         $this->middleware('can:products.destroy')->only(['destroy']);
         $this->middleware('can:change.status.products')->only(['changeStatus']);
     }
 
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'provider']);
+        $query = Product::with(['category', 'provider', 'brand']);
         if ($s = $request->query('search')) {
             $query->where(fn ($q) => $q->where('name', 'like', "%{$s}%")->orWhere('code', 'like', "%{$s}%"));
         }
@@ -33,25 +37,28 @@ class ProductController extends Controller
 
     public function store(StoreRequest $request)
     {
-        $product = Product::create($request->all());
+        $product = Product::create($request->all() + ['slug' => $this->uniqueSlug($request->name)]);
 
-        // Si no se envió código, generar uno con el id (8 dígitos), igual que el admin.
         if (! $request->filled('code')) {
             $product->update(['code' => str_pad($product->id, 8, '0', STR_PAD_LEFT)]);
         }
 
-        return new ProductResource($product->load(['category', 'provider']));
+        return new ProductResource($product->load(self::RELATIONS));
     }
 
     public function show(Product $product)
     {
-        return new ProductResource($product->load(['category', 'provider']));
+        return new ProductResource($product->load(self::RELATIONS));
     }
 
     public function update(UpdateRequest $request, Product $product)
     {
-        $product->update($request->all());
-        return new ProductResource($product->load(['category', 'provider']));
+        $data = $request->all();
+        if ($request->filled('name') && $request->name !== $product->name) {
+            $data['slug'] = $this->uniqueSlug($request->name, $product->id);
+        }
+        $product->update($data);
+        return new ProductResource($product->load(self::RELATIONS));
     }
 
     public function destroy(Product $product)
@@ -64,7 +71,33 @@ class ProductController extends Controller
     public function changeStatus(Product $product)
     {
         $product->update(['status' => $product->status === 'ACTIVE' ? 'DEACTIVATED' : 'ACTIVE']);
-        return new ProductResource($product->load(['category', 'provider']));
+        return new ProductResource($product->load(['category', 'provider', 'brand']));
+    }
+
+    /** Sube una o varias imágenes a la galería del producto. */
+    public function uploadImages(Request $request, Product $product)
+    {
+        $request->validate([
+            'images'   => ['required', 'array', 'min:1'],
+            'images.*' => ['image', 'max:4096'],
+        ]);
+
+        foreach ($request->file('images') as $file) {
+            $path = $file->store('products', 'public');
+            $product->images()->create(['url' => $path]);
+        }
+
+        return new ProductResource($product->load(self::RELATIONS));
+    }
+
+    /** Elimina una imagen de la galería. */
+    public function deleteImage(Product $product, Image $image)
+    {
+        if ($image->imageable_id !== $product->id || $image->imageable_type !== Product::class) {
+            abort(404);
+        }
+        $image->delete();
+        return response()->json(null, 204);
     }
 
     /** PDF con los códigos de barra de todos los productos. */
@@ -73,5 +106,16 @@ class ProductController extends Controller
         $products = Product::get();
         $pdf = PDF::loadView('admin.product.barcode', compact('products'));
         return $pdf->download('codigos_de_barras.pdf');
+    }
+
+    private function uniqueSlug(string $name, ?int $ignoreId = null): string
+    {
+        $base = Str::slug($name);
+        $slug = $base ?: 'producto';
+        $i = 1;
+        while (Product::withTrashed()->where('slug', $slug)->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))->exists()) {
+            $slug = $base . '-' . $i++;
+        }
+        return $slug;
     }
 }

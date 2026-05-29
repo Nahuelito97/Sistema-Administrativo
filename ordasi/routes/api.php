@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\BrandController;
 use App\Http\Controllers\Api\V1\BusinessController;
 use App\Http\Controllers\Api\V1\CategoryController;
+use App\Http\Controllers\Api\V1\SubcategoryController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\PermissionController;
 use App\Http\Controllers\Api\V1\ProductController;
@@ -27,10 +29,13 @@ Route::prefix('v1')->group(function () {
 
         // Catálogo
         Route::apiResource('categories', CategoryController::class);
+        Route::apiResource('subcategories', SubcategoryController::class);
+        Route::apiResource('brands', BrandController::class);
         Route::apiResource('providers', ProviderController::class);
-        Route::apiResource('clients', ClientController::class);
         Route::get('products/barcodes/pdf', [ProductController::class, 'barcodesPdf'])->name('products.barcodes');
         Route::patch('products/{product}/status', [ProductController::class, 'changeStatus'])->name('products.status');
+        Route::post('products/{product}/images', [ProductController::class, 'uploadImages'])->name('products.images.store');
+        Route::delete('products/{product}/images/{image}', [ProductController::class, 'deleteImage'])->name('products.images.destroy');
         Route::apiResource('products', ProductController::class);
 
         // Ventas y compras: solo listar, ver y crear (igual que el panel admin)
