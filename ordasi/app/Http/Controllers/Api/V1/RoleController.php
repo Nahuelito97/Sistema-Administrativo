@@ -31,7 +31,7 @@ class RoleController extends Controller
             'permissions.*' => ['string', 'exists:permissions,name'],
         ]);
 
-        $role = Role::create(['name' => $data['name']]);
+        $role = Role::create(['name' => $data['name'], 'guard_name' => 'web']);
         $role->syncPermissions($data['permissions'] ?? []);
 
         return new RoleResource($role->load('permissions'));

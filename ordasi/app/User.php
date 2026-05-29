@@ -12,6 +12,12 @@ class User extends Authenticatable
     use HasApiTokens, Notifiable, HasRoles;
 
     /**
+     * Fija el guard de spatie a 'web' (los permisos/roles se sembraron así).
+     * Evita el mismatch cuando la request autentica con el guard 'sanctum'.
+     */
+    protected string $guard_name = 'web';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
