@@ -22,4 +22,16 @@ class StatsController extends Controller
             'low_stock'         => Product::where('stock', '<', 10)->count(),
         ]);
     }
+
+    /** Totales de venta de los últimos 7 días (para el gráfico del dashboard). */
+    public function salesDaily()
+    {
+        $days = collect(range(6, 0))->map(function ($i) {
+            $date = Carbon::today()->subDays($i);
+            $total = Sale::whereDate('sale_date', $date)->sum('total');
+            return ['date' => $date->format('d/m'), 'total' => round((float) $total, 2)];
+        });
+
+        return response()->json($days->values());
+    }
 }
