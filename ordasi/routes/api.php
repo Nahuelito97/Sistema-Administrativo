@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\SliderController;
 use App\Http\Controllers\Api\V1\SocialMediaController;
 use App\Http\Controllers\Api\V1\SubscriptionController;
 use App\Http\Controllers\Api\V1\PaymentController;
+use App\Http\Controllers\Api\V1\PublicCatalogController;
 use App\Http\Controllers\Api\V1\PostController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\PromotionController;
@@ -34,6 +35,13 @@ Route::prefix('v1')->group(function () {
 
     // Público
     Route::post('login', [AuthController::class, 'login'])->name('api.login');
+    Route::post('register', [AuthController::class, 'register'])->name('api.register');
+
+    // Catálogo público (storefront)
+    Route::get('public/products', [PublicCatalogController::class, 'products'])->name('public.products');
+    Route::get('public/products/{product:slug}', [PublicCatalogController::class, 'product'])->name('public.product');
+    Route::get('public/categories', [PublicCatalogController::class, 'categories'])->name('public.categories');
+    Route::get('public/brands', [PublicCatalogController::class, 'brands'])->name('public.brands');
     // Webhook de MercadoPago (lo llama MP, sin token)
     Route::post('webhooks/mercadopago', [PaymentController::class, 'webhook'])->name('webhooks.mercadopago');
 

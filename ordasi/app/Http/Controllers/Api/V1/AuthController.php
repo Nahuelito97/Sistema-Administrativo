@@ -12,6 +12,26 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     /**
+     * Registro de cliente (storefront): crea usuario y devuelve token.
+     */
+    public function register(Request $request)
+    {
+        $data = $request->validate([
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'email', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:5', 'confirmed'],
+        ]);
+
+        $user = User::create($data);
+        $token = $user->createToken('storefront')->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user'  => new UserResource($user),
+        ], 201);
+    }
+
+    /**
      * Login: devuelve un token Bearer (Sanctum).
      */
     public function login(Request $request)
