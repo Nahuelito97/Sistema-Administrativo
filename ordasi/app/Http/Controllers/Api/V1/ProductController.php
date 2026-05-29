@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Product\StoreRequest;
 use App\Http\Requests\Product\UpdateRequest;
 use App\Http\Resources\ProductResource;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 
 class ProductController extends Controller
 {
@@ -16,6 +17,7 @@ class ProductController extends Controller
         $this->middleware('can:products.create')->only(['store']);
         $this->middleware('can:products.edit')->only(['update']);
         $this->middleware('can:products.destroy')->only(['destroy']);
+        $this->middleware('can:change.status.products')->only(['changeStatus']);
     }
 
     public function index()
@@ -52,5 +54,20 @@ class ProductController extends Controller
     {
         $product->delete();
         return response()->json(null, 204);
+    }
+
+    /** Alterna ACTIVE / DEACTIVATED. */
+    public function changeStatus(Product $product)
+    {
+        $product->update(['status' => $product->status === 'ACTIVE' ? 'DEACTIVATED' : 'ACTIVE']);
+        return new ProductResource($product->load(['category', 'provider']));
+    }
+
+    /** PDF con los códigos de barra de todos los productos. */
+    public function barcodesPdf()
+    {
+        $products = Product::get();
+        $pdf = PDF::loadView('admin.product.barcode', compact('products'));
+        return $pdf->download('codigos_de_barras.pdf');
     }
 }

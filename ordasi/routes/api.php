@@ -29,10 +29,18 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('categories', CategoryController::class);
         Route::apiResource('providers', ProviderController::class);
         Route::apiResource('clients', ClientController::class);
+        Route::get('products/barcodes/pdf', [ProductController::class, 'barcodesPdf'])->name('products.barcodes');
+        Route::patch('products/{product}/status', [ProductController::class, 'changeStatus'])->name('products.status');
         Route::apiResource('products', ProductController::class);
 
         // Ventas y compras: solo listar, ver y crear (igual que el panel admin)
+        Route::patch('sales/{sale}/status', [SaleController::class, 'changeStatus'])->name('sales.status');
+        Route::get('sales/{sale}/pdf', [SaleController::class, 'pdf'])->name('sales.pdf');
         Route::apiResource('sales', SaleController::class)->only(['index', 'show', 'store']);
+
+        Route::patch('purchases/{purchase}/status', [PurchaseController::class, 'changeStatus'])->name('purchases.status');
+        Route::get('purchases/{purchase}/pdf', [PurchaseController::class, 'pdf'])->name('purchases.pdf');
+        Route::post('purchases/{purchase}/comprobante', [PurchaseController::class, 'uploadComprobante'])->name('purchases.comprobante');
         Route::apiResource('purchases', PurchaseController::class)->only(['index', 'show', 'store']);
 
         // Administración
