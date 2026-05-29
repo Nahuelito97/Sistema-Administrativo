@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\StoreRequest;
 use App\Http\Requests\Client\UpdateRequest;
 use App\Http\Resources\ClientResource;
+use Illuminate\Http\Request;
 
 class ClientController extends Controller
 {
@@ -18,9 +19,14 @@ class ClientController extends Controller
         $this->middleware('can:clients.destroy')->only(['destroy']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return ClientResource::collection(Client::latest()->paginate(20));
+        $query = Client::query();
+        if ($s = $request->query('search')) {
+            $query->where('name', 'like', "%{$s}%");
+        }
+        $perPage = min((int) $request->query('per_page', 20) ?: 20, 1000);
+        return ClientResource::collection($query->latest()->paginate($perPage));
     }
 
     public function store(StoreRequest $request)

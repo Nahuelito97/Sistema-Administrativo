@@ -8,6 +8,7 @@ use App\Http\Requests\Product\StoreRequest;
 use App\Http\Requests\Product\UpdateRequest;
 use App\Http\Resources\ProductResource;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
@@ -20,11 +21,14 @@ class ProductController extends Controller
         $this->middleware('can:change.status.products')->only(['changeStatus']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return ProductResource::collection(
-            Product::with(['category', 'provider'])->latest()->paginate(20)
-        );
+        $query = Product::with(['category', 'provider']);
+        if ($s = $request->query('search')) {
+            $query->where(fn ($q) => $q->where('name', 'like', "%{$s}%")->orWhere('code', 'like', "%{$s}%"));
+        }
+        $perPage = min((int) $request->query('per_page', 20) ?: 20, 1000);
+        return ProductResource::collection($query->latest()->paginate($perPage));
     }
 
     public function store(StoreRequest $request)

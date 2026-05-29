@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Provider\StoreRequest;
 use App\Http\Requests\Provider\UpdateRequest;
 use App\Http\Resources\ProviderResource;
+use Illuminate\Http\Request;
 
 class ProviderController extends Controller
 {
@@ -18,9 +19,14 @@ class ProviderController extends Controller
         $this->middleware('can:providers.destroy')->only(['destroy']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return ProviderResource::collection(Provider::latest()->paginate(20));
+        $query = Provider::query();
+        if ($s = $request->query('search')) {
+            $query->where('name', 'like', "%{$s}%");
+        }
+        $perPage = min((int) $request->query('per_page', 20) ?: 20, 1000);
+        return ProviderResource::collection($query->latest()->paginate($perPage));
     }
 
     public function store(StoreRequest $request)
