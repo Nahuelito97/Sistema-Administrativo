@@ -141,4 +141,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Product::class, 'favorites')->withTimestamps();
     }
+
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
+    }
 }

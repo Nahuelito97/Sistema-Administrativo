@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\V1\PostController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\PromotionController;
 use App\Http\Controllers\Api\V1\OfferController;
+use App\Http\Controllers\Api\V1\AddressController;
 use App\Http\Controllers\Api\V1\RatingController;
 use App\Http\Controllers\Api\V1\TagController;
 use App\Http\Controllers\Api\V1\BusinessController;
@@ -211,8 +212,15 @@ Route::prefix('v1')->group(function () {
         Route::delete('cart/items/{item}', [CartController::class, 'removeItem'])->name('cart.items.remove');
         Route::delete('cart', [CartController::class, 'clear'])->name('cart.clear');
 
+        // Direcciones del cliente
+        Route::get('addresses', [AddressController::class, 'index'])->name('addresses.index');
+        Route::post('addresses', [AddressController::class, 'store'])->name('addresses.store');
+        Route::put('addresses/{address}', [AddressController::class, 'update'])->name('addresses.update');
+        Route::delete('addresses/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
+
         // Órdenes del cliente
         Route::post('orders', [OrderController::class, 'store'])->name('orders.store');
+        Route::get('my-orders/{order}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
         Route::get('my-orders', [OrderController::class, 'myOrders'])->name('orders.mine');
         Route::get('my-orders/{order}', [OrderController::class, 'myShow'])->name('orders.mine.show');
         Route::post('orders/{order}/pay', [PaymentController::class, 'pay'])->name('orders.pay');

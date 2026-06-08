@@ -35,7 +35,19 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->validate(['shipping_address' => ['nullable', 'string', 'max:255']]);
+        $data = $request->validate([
+            'shipping_address' => ['nullable', 'string', 'max:255'],
+            'address_id'       => ['nullable', 'exists:addresses,id'],
+            'shipping_type'    => ['nullable', 'in:home,pickup,arrangement'],
+        ]);
+
+        // Si eligió una dirección guardada, tomamos su snapshot.
+        if (! empty($data['address_id'])) {
+            $address = \App\Address::where('id', $data['address_id'])->where('user_id', $request->user()->id)->first();
+            if ($address) {
+                $data['shipping_address'] = $address->recipient . ' — ' . $address->one_line . ($address->phone ? " (tel: {$address->phone})" : '');
+            }
+        }
 
         $cart = ShoppingCart::with('details.product.promotions', 'details.product.offers', 'details.variant')->where('user_id', $request->user()->id)->first();
         if (! $cart || $cart->details->isEmpty()) {
@@ -77,6 +89,7 @@ class OrderController extends Controller
                     'tax'              => 0,
                     'total'            => round($total, 2),
                     'shipping_address' => $data['shipping_address'] ?? null,
+                    'shipping_type'    => $data['shipping_type'] ?? 'home',
                 ]);
                 foreach ($details as $d) {
                     $order->details()->create([
@@ -126,6 +139,15 @@ class OrderController extends Controller
     {
         abort_unless($order->user_id === $request->user()->id, 403);
         return new OrderResource($order->load('details.product', 'user', 'company'));
+    }
+
+    /** Comprobante PDF de la orden (descargable por el comprador). */
+    public function invoice(Request $request, Order $order)
+    {
+        abort_unless($order->user_id === $request->user()->id, 403);
+        $order->load('details.product', 'user', 'company');
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('invoices.order', ['order' => $order]);
+        return $pdf->download("comprobante-{$order->id}.pdf");
     }
 
     // ---------- Admin / Vendedor (scoped) ----------
