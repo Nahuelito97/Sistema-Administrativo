@@ -12,6 +12,8 @@ class OrderResource extends JsonResource
         return [
             'id'              => $this->id,
             'user_id'         => $this->user_id,
+            'company_id'      => $this->company_id,
+            'seller_id'       => $this->seller_id,
             'order_date'      => $this->order_date,
             'tax'             => $this->tax,
             'total'           => $this->total,
@@ -19,6 +21,7 @@ class OrderResource extends JsonResource
             'payment_status'  => $this->payment_status,
             'shipping_address'=> $this->shipping_address,
             'user'            => new UserResource($this->whenLoaded('user')),
+            'company'         => new CompanyResource($this->whenLoaded('company')),
             'details'         => OrderDetailResource::collection($this->whenLoaded('details')),
             'created_at'      => $this->created_at,
         ];

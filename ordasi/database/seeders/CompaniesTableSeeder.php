@@ -21,7 +21,7 @@ class CompaniesTableSeeder extends Seeder
             'products.index', 'products.show', 'products.create', 'products.edit', 'products.destroy',
             'change.status.products',
             'companies.show', 'companies.edit',
-            'orders.index', 'orders.show',
+            'orders.index', 'orders.show', 'orders.edit',
             'reports.day', 'reports.date',
         ];
         $vendedor->syncPermissions(
