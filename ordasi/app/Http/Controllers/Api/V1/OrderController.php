@@ -139,9 +139,20 @@ class OrderController extends Controller
     {
         $this->assertOwned($order, $request);
         $data = $request->validate([
-            'shipping_status' => ['sometimes', 'in:PENDING,APPROVED,CANCELED,DELIVERED'],
-            'payment_status'  => ['sometimes', 'in:PENDING,PAID,REFUNDED'],
+            'shipping_status'  => ['sometimes', 'in:PENDING,APPROVED,CANCELED,DELIVERED'],
+            'payment_status'   => ['sometimes', 'in:PENDING,PAID,REFUNDED'],
+            'shipping_carrier' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'tracking_code'    => ['sometimes', 'nullable', 'string', 'max:255'],
         ]);
+
+        // Timestamps automáticos según el estado de envío.
+        if (($data['shipping_status'] ?? null) === 'APPROVED' && ! $order->shipped_at) {
+            $data['shipped_at'] = now();
+        }
+        if (($data['shipping_status'] ?? null) === 'DELIVERED' && ! $order->delivered_at) {
+            $data['delivered_at'] = now();
+        }
+
         $order->update($data);
         return new OrderResource($order->load('user', 'company'));
     }
