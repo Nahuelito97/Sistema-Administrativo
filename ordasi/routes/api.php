@@ -19,6 +19,8 @@ use App\Http\Controllers\Api\V1\TagController;
 use App\Http\Controllers\Api\V1\BusinessController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CompanyController;
+use App\Http\Controllers\Api\V1\SellerController;
+use App\Http\Controllers\Api\V1\SellerAdminController;
 use App\Http\Controllers\Api\V1\SubcategoryController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\PermissionController;
@@ -63,6 +65,15 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', [AuthController::class, 'me'])->name('api.me');
         Route::post('logout', [AuthController::class, 'logout'])->name('api.logout');
+
+        // Quiero vender (onboarding del usuario autenticado)
+        Route::get('seller/status', [SellerController::class, 'status'])->name('seller.status');
+        Route::post('seller/apply', [SellerController::class, 'apply'])->name('seller.apply');
+
+        // Moderación de vendedores (admin)
+        Route::get('sellers', [SellerAdminController::class, 'index'])->name('sellers.index');
+        Route::get('sellers/{user}', [SellerAdminController::class, 'show'])->name('sellers.show');
+        Route::patch('sellers/{user}/status', [SellerAdminController::class, 'updateStatus'])->name('sellers.status');
 
         // Tiendas (marketplace, admin)
         Route::post('companies/{company}/logo', [CompanyController::class, 'uploadLogo'])->name('companies.logo');
