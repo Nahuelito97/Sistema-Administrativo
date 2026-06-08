@@ -43,4 +43,15 @@ class Order extends Model
     {
         return $this->hasMany(Claim::class);
     }
+
+    public function rating()
+    {
+        return $this->hasOne(OrderRating::class);
+    }
+
+    /** ¿Se puede calificar? Entregada y aún sin calificar. */
+    public function getCanRateAttribute(): bool
+    {
+        return $this->shipping_status === 'DELIVERED' && ! $this->rating()->exists();
+    }
 }

@@ -59,17 +59,29 @@ class Company extends Model
         return $this->banner ? Storage::disk('public')->url($this->banner) : null;
     }
 
-    /** Reputación de la tienda: promedio y cantidad de reseñas de sus productos. */
+    /**
+     * Reputación de la tienda: promedio de las calificaciones por venta
+     * (producto/atención/envío). Si no hay, cae a las reseñas de productos.
+     */
     public function reputation(): array
     {
-        $row = Rating::where('rateable_type', Product::class)
+        $row = OrderRating::where('company_id', $this->id)
+            ->selectRaw('AVG((product_score + attention_score + shipping_score) / 3) as avg, COUNT(*) as cnt')
+            ->first();
+
+        if ($row && $row->cnt) {
+            return ['avg' => round((float) $row->avg, 1), 'count' => (int) $row->cnt];
+        }
+
+        // Fallback: reseñas de productos.
+        $prod = Rating::where('rateable_type', Product::class)
             ->whereIn('rateable_id', $this->products()->pluck('id'))
             ->selectRaw('AVG(rating) as avg, COUNT(*) as cnt')
             ->first();
 
         return [
-            'avg'   => $row && $row->cnt ? round((float) $row->avg, 1) : null,
-            'count' => (int) ($row->cnt ?? 0),
+            'avg'   => $prod && $prod->cnt ? round((float) $prod->avg, 1) : null,
+            'count' => (int) ($prod->cnt ?? 0),
         ];
     }
 

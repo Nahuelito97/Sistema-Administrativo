@@ -19,6 +19,7 @@ class OrderResource extends JsonResource
             'total'           => $this->total,
             'shipping_status' => $this->shipping_status,
             'payment_status'  => $this->payment_status,
+            'can_rate'        => $this->shipping_status === 'DELIVERED' && ! $this->rating()->exists(),
             'shipping_address'=> $this->shipping_address,
             'shipping_carrier'=> $this->shipping_carrier,
             'tracking_code'   => $this->tracking_code,
