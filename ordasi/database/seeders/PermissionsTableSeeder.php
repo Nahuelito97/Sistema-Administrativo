@@ -52,6 +52,8 @@ class PermissionsTableSeeder extends Seeder
             'purchases.pdf', 'sales.pdf',
             // Empresa
             'business.index', 'business.edit',
+            // Tiendas (marketplace)
+            'companies.index', 'companies.show', 'companies.edit', 'companies.create', 'companies.destroy',
             // Acciones varias
             'upload.purchases',
             'change.status.products', 'change.status.purchases', 'change.status.sales',

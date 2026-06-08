@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
-    public const RELATIONS = ['category', 'subcategory', 'provider', 'brand', 'images', 'promotions', 'ratings.user'];
+    public const RELATIONS = ['category', 'subcategory', 'provider', 'brand', 'company', 'images', 'promotions', 'ratings.user'];
 
     public function __construct()
     {

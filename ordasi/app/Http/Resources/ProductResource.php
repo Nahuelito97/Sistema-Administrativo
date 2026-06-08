@@ -26,6 +26,8 @@ class ProductResource extends JsonResource
             'subcategory_id'    => $this->subcategory_id,
             'provider_id'       => $this->provider_id,
             'brand_id'          => $this->brand_id,
+            'company_id'        => $this->company_id,
+            'company'           => new CompanyResource($this->whenLoaded('company')),
             'category'          => new CategoryResource($this->whenLoaded('category')),
             'subcategory'       => new SubcategoryResource($this->whenLoaded('subcategory')),
             'provider'          => new ProviderResource($this->whenLoaded('provider')),

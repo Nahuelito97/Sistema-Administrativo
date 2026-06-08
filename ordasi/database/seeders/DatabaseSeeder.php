@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             PermissionsTableSeeder::class,
             UsersTableSeeder::class,
             BusinessTableSeeder::class,
+            CompaniesTableSeeder::class,
         ]);
     }
 }

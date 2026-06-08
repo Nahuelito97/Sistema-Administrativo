@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\V1\RatingController;
 use App\Http\Controllers\Api\V1\TagController;
 use App\Http\Controllers\Api\V1\BusinessController;
 use App\Http\Controllers\Api\V1\CategoryController;
+use App\Http\Controllers\Api\V1\CompanyController;
 use App\Http\Controllers\Api\V1\SubcategoryController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\PermissionController;
@@ -42,6 +43,9 @@ Route::prefix('v1')->group(function () {
     Route::get('public/products/{product:slug}', [PublicCatalogController::class, 'product'])->name('public.product');
     Route::get('public/categories', [PublicCatalogController::class, 'categories'])->name('public.categories');
     Route::get('public/brands', [PublicCatalogController::class, 'brands'])->name('public.brands');
+    // Tiendas del marketplace (storefront)
+    Route::get('public/companies', [PublicCatalogController::class, 'companies'])->name('public.companies');
+    Route::get('public/companies/{company:slug}', [PublicCatalogController::class, 'company'])->name('public.company');
     // Webhook de MercadoPago (lo llama MP, sin token)
     Route::post('webhooks/mercadopago', [PaymentController::class, 'webhook'])->name('webhooks.mercadopago');
 
@@ -59,6 +63,11 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', [AuthController::class, 'me'])->name('api.me');
         Route::post('logout', [AuthController::class, 'logout'])->name('api.logout');
+
+        // Tiendas (marketplace, admin)
+        Route::post('companies/{company}/logo', [CompanyController::class, 'uploadLogo'])->name('companies.logo');
+        Route::post('companies/{company}/banner', [CompanyController::class, 'uploadBanner'])->name('companies.banner');
+        Route::apiResource('companies', CompanyController::class);
 
         // Catálogo
         Route::apiResource('categories', CategoryController::class);

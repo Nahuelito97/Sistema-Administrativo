@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Company;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BrandResource;
 use App\Http\Resources\CategoryResource;
+use App\Http\Resources\CompanyResource;
 use App\Http\Resources\ProductResource;
 use App\Product;
 use Illuminate\Http\Request;
@@ -61,5 +63,40 @@ class PublicCatalogController extends Controller
     public function brands()
     {
         return BrandResource::collection(\App\Brand::orderBy('name')->get());
+    }
+
+    /** Tiendas activas (listado público del marketplace). */
+    public function companies(Request $request)
+    {
+        $query = Company::active()
+            ->search($request->query('search'))
+            ->withCount(['products' => fn ($q) => $q->whereIn('visibility', ['SHOP', 'BOTH'])->where('status', 'ACTIVE')]);
+
+        $perPage = min((int) $request->query('per_page', 24) ?: 24, 60);
+        return CompanyResource::collection($query->latest()->paginate($perPage));
+    }
+
+    /** Perfil público de una tienda + sus productos visibles. */
+    public function company(Company $company)
+    {
+        abort_unless($company->status === 'active', 404);
+
+        $products = $company->products()
+            ->whereIn('visibility', ['SHOP', 'BOTH'])
+            ->where('status', 'ACTIVE')
+            ->with(['category', 'brand', 'promotions', 'images'])
+            ->latest()
+            ->paginate(min((int) request()->query('per_page', 12) ?: 12, 60));
+
+        return (new CompanyResource($company->loadCount('products')))
+            ->additional(['products' => [
+                'data' => ProductResource::collection($products->items()),
+                'meta' => [
+                    'current_page' => $products->currentPage(),
+                    'last_page'    => $products->lastPage(),
+                    'per_page'     => $products->perPage(),
+                    'total'        => $products->total(),
+                ],
+            ]]);
     }
 }
