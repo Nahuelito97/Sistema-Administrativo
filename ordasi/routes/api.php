@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\V1\SellerAdminController;
 use App\Http\Controllers\Api\V1\FavoriteController;
 use App\Http\Controllers\Api\V1\QuestionController;
 use App\Http\Controllers\Api\V1\VariantController;
+use App\Http\Controllers\Api\V1\ChatController;
 use App\Http\Controllers\Api\V1\SubcategoryController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\PermissionController;
@@ -119,6 +120,12 @@ Route::prefix('v1')->group(function () {
         Route::post('products/{product}/questions', [QuestionController::class, 'store'])->name('products.questions.store');
         Route::get('seller/questions', [QuestionController::class, 'sellerIndex'])->name('seller.questions');
         Route::post('questions/{question}/answer', [QuestionController::class, 'answer'])->name('questions.answer');
+
+        // Chat comprador <-> vendedor (una conversación por orden)
+        Route::get('conversations', [ChatController::class, 'index'])->name('conversations.index');
+        Route::post('orders/{order}/conversation', [ChatController::class, 'forOrder'])->name('orders.conversation');
+        Route::get('conversations/{conversation}/messages', [ChatController::class, 'messages'])->name('conversations.messages');
+        Route::post('conversations/{conversation}/messages', [ChatController::class, 'send'])->name('conversations.send');
 
         // Favoritos (wishlist del usuario)
         Route::get('favorites', [FavoriteController::class, 'index'])->name('favorites.index');

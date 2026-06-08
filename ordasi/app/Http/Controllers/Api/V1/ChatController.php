@@ -1,0 +1,77 @@
+<?php
+
+namespace App\Http\Controllers\Api\V1;
+
+use App\Conversation;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\ConversationResource;
+use App\Http\Resources\MessageResource;
+use App\Order;
+use Illuminate\Http\Request;
+
+/**
+ * Chat comprador <-> vendedor, una conversación por orden. REST + polling.
+ */
+class ChatController extends Controller
+{
+    /** Mis conversaciones (como comprador y/o como vendedor de mi tienda). */
+    public function index(Request $request)
+    {
+        $user = $request->user();
+        $query = Conversation::with(['company', 'buyer', 'messages']);
+
+        if ($user->hasRole('Admin')) {
+            // ve todas
+        } elseif ($user->hasRole('Vendedor') && $user->company_id) {
+            $query->where(fn ($q) => $q->where('buyer_id', $user->id)->orWhere('company_id', $user->company_id));
+        } else {
+            $query->where('buyer_id', $user->id);
+        }
+
+        return ConversationResource::collection($query->orderByDesc('last_message_at')->orderByDesc('id')->paginate(30));
+    }
+
+    /** Obtiene (o crea) la conversación de una orden. */
+    public function forOrder(Request $request, Order $order)
+    {
+        $user = $request->user();
+        $isBuyer = $order->user_id === $user->id;
+        $isSeller = $user->hasRole('Vendedor') && (int) $user->company_id === (int) $order->company_id;
+        abort_unless($isBuyer || $isSeller || $user->hasRole('Admin'), 403);
+
+        $conversation = Conversation::firstOrCreate(
+            ['order_id' => $order->id],
+            ['buyer_id' => $order->user_id, 'company_id' => $order->company_id]
+        );
+
+        return new ConversationResource($conversation->load(['company', 'buyer']));
+    }
+
+    /** Mensajes de una conversación (y marca como leídos los ajenos). */
+    public function messages(Request $request, Conversation $conversation)
+    {
+        abort_unless($conversation->isParticipant($request->user()), 403);
+
+        $conversation->messages()
+            ->whereNull('read_at')
+            ->where('sender_id', '!=', $request->user()->id)
+            ->update(['read_at' => now()]);
+
+        return MessageResource::collection($conversation->messages()->with('sender')->orderBy('created_at')->get());
+    }
+
+    /** Enviar un mensaje. */
+    public function send(Request $request, Conversation $conversation)
+    {
+        abort_unless($conversation->isParticipant($request->user()), 403);
+        $data = $request->validate(['body' => ['required', 'string', 'max:2000']]);
+
+        $message = $conversation->messages()->create([
+            'sender_id' => $request->user()->id,
+            'body'      => $data['body'],
+        ]);
+        $conversation->update(['last_message_at' => now()]);
+
+        return (new MessageResource($message->load('sender')))->response()->setStatusCode(201);
+    }
+}
