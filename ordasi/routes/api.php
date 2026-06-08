@@ -16,6 +16,8 @@ use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\PromotionController;
 use App\Http\Controllers\Api\V1\OfferController;
 use App\Http\Controllers\Api\V1\AddressController;
+use App\Http\Controllers\Api\V1\FaqController;
+use App\Http\Controllers\Api\V1\ContactController;
 use App\Http\Controllers\Api\V1\RatingController;
 use App\Http\Controllers\Api\V1\TagController;
 use App\Http\Controllers\Api\V1\BusinessController;
@@ -79,6 +81,9 @@ Route::prefix('v1')->group(function () {
     Route::get('public/social-media', [SocialMediaController::class, 'publicIndex'])->name('public.social');
     Route::get('public/settings', [SettingController::class, 'publicIndex'])->name('public.settings');
     Route::post('subscribe', [SubscriptionController::class, 'store'])->name('subscribe');
+    // Centro de ayuda (público) + contacto (público)
+    Route::get('faqs', [FaqController::class, 'index'])->name('faqs.index');
+    Route::post('contact', [ContactController::class, 'store'])->name('contact.store');
 
     // Protegido por token Sanctum (los permisos can: se aplican en cada controller)
     Route::middleware('auth:sanctum')->group(function () {
@@ -197,6 +202,13 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('users', UserController::class);
         Route::apiResource('roles', RoleController::class);
         Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
+
+        // Centro de ayuda (admin) + bandeja de contacto
+        Route::post('faqs', [FaqController::class, 'store'])->name('faqs.store');
+        Route::put('faqs/{faq}', [FaqController::class, 'update'])->name('faqs.update');
+        Route::delete('faqs/{faq}', [FaqController::class, 'destroy'])->name('faqs.destroy');
+        Route::get('contacts', [ContactController::class, 'index'])->name('contacts.index');
+        Route::patch('contacts/{contact}/handled', [ContactController::class, 'markHandled'])->name('contacts.handled');
 
         // Reportes
         Route::get('reports/sales', [ReportController::class, 'sales'])->name('reports.sales');
