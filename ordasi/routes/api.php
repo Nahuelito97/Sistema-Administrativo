@@ -50,6 +50,8 @@ Route::prefix('v1')->group(function () {
     // Catálogo público (storefront)
     Route::get('public/products', [PublicCatalogController::class, 'products'])->name('public.products');
     Route::get('public/products/{product:slug}', [PublicCatalogController::class, 'product'])->name('public.product');
+    Route::get('public/products/{product:slug}/related', [PublicCatalogController::class, 'related'])->name('public.product.related');
+    Route::get('public/most-viewed', [PublicCatalogController::class, 'mostViewed'])->name('public.most-viewed');
     Route::get('public/categories', [PublicCatalogController::class, 'categories'])->name('public.categories');
     Route::get('public/categories/tree', [CategoryController::class, 'tree'])->name('public.categories.tree');
     Route::get('public/brands', [PublicCatalogController::class, 'brands'])->name('public.brands');

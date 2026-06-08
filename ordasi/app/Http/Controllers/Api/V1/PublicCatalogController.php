@@ -59,6 +59,32 @@ class PublicCatalogController extends Controller
         return new ProductResource($product->load(['category', 'subcategory', 'brand', 'company', 'images', 'variants', 'promotions', 'ratings.user']));
     }
 
+    /** Productos relacionados (misma categoría) + más de la misma tienda. */
+    public function related(Product $product)
+    {
+        $base = Product::whereIn('visibility', ['SHOP', 'BOTH'])->where('status', 'ACTIVE')->where('id', '!=', $product->id);
+
+        $related = (clone $base)->where('category_id', $product->category_id)
+            ->with(['brand', 'company', 'promotions', 'images'])->latest()->limit(8)->get();
+
+        $fromShop = (clone $base)->where('company_id', $product->company_id)
+            ->with(['brand', 'company', 'promotions', 'images'])->latest()->limit(8)->get();
+
+        return response()->json([
+            'related'   => ProductResource::collection($related),
+            'from_shop' => ProductResource::collection($fromShop),
+        ]);
+    }
+
+    /** Productos más vistos (para el home). */
+    public function mostViewed()
+    {
+        $products = Product::whereIn('visibility', ['SHOP', 'BOTH'])->where('status', 'ACTIVE')
+            ->with(['brand', 'company', 'promotions', 'images'])
+            ->orderByDesc('views')->limit(8)->get();
+        return ProductResource::collection($products);
+    }
+
     public function categories()
     {
         return CategoryResource::collection(\App\Category::orderBy('name')->get());
