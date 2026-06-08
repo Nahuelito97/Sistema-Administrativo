@@ -23,7 +23,7 @@ class ProductController extends Controller
     {
         $this->middleware('can:products.index')->only(['index', 'show']);
         $this->middleware('can:products.create')->only(['store', 'uploadImages']);
-        $this->middleware('can:products.edit')->only(['update', 'uploadImages', 'deleteImage']);
+        $this->middleware('can:products.edit')->only(['update', 'uploadImages', 'deleteImage', 'bulk']);
         $this->middleware('can:products.destroy')->only(['destroy']);
         $this->middleware('can:change.status.products')->only(['changeStatus']);
     }
@@ -90,6 +90,49 @@ class ProductController extends Controller
         $this->assertOwned($product, $request);
         $product->update(['status' => $product->status === 'ACTIVE' ? 'DEACTIVATED' : 'ACTIVE']);
         return new ProductResource($product->load(['category', 'provider', 'brand']));
+    }
+
+    /** Edición masiva de precio / stock / estado / visibilidad (scoped al vendedor). */
+    public function bulk(Request $request)
+    {
+        $data = $request->validate([
+            'ids'        => ['required', 'array', 'min:1'],
+            'ids.*'      => ['integer'],
+            'action'     => ['required', 'in:price,stock,status,visibility'],
+            'mode'       => ['required_if:action,price,stock', 'in:set,increment,decrease'],
+            'value_type' => ['required_if:action,price', 'in:percent,fixed'],
+            'value'      => ['required_if:action,price,stock', 'numeric'],
+            'status'     => ['required_if:action,status', 'in:ACTIVE,DEACTIVATED'],
+            'visibility' => ['required_if:action,visibility', 'in:SHOP,POS,BOTH,DISABLED'],
+        ]);
+
+        // Sólo productos de la tienda del vendedor (el admin alcanza todos).
+        $query = $this->scopeOwned(Product::whereIn('id', $data['ids']), $request);
+        $products = $query->get();
+
+        foreach ($products as $product) {
+            match ($data['action']) {
+                'price'      => $product->update(['sell_price' => $this->applyDelta((float) $product->sell_price, $data, true)]),
+                'stock'      => $product->update(['stock' => max(0, (int) $this->applyDelta((float) $product->stock, $data, false))]),
+                'status'     => $product->update(['status' => $data['status']]),
+                'visibility' => $product->update(['visibility' => $data['visibility']]),
+            };
+        }
+
+        return response()->json(['updated' => $products->count()]);
+    }
+
+    /** Calcula el nuevo valor según mode/value_type. */
+    private function applyDelta(float $current, array $data, bool $isPrice): float
+    {
+        $value = (float) $data['value'];
+        if ($data['mode'] === 'set') {
+            return round($value, 2);
+        }
+        $delta = ($isPrice && ($data['value_type'] ?? null) === 'percent')
+            ? $current * ($value / 100)
+            : $value;
+        return round($data['mode'] === 'increment' ? $current + $delta : max(0, $current - $delta), 2);
     }
 
     /** Sube una o varias imágenes a la galería del producto. */

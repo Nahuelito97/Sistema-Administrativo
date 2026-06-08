@@ -143,6 +143,7 @@ Route::prefix('v1')->group(function () {
         Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
         Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::get('products/barcodes/pdf', [ProductController::class, 'barcodesPdf'])->name('products.barcodes');
+        Route::post('products/bulk', [ProductController::class, 'bulk'])->name('products.bulk');
         Route::patch('products/{product}/status', [ProductController::class, 'changeStatus'])->name('products.status');
         Route::post('products/{product}/images', [ProductController::class, 'uploadImages'])->name('products.images.store');
         Route::delete('products/{product}/images/{image}', [ProductController::class, 'deleteImage'])->name('products.images.destroy');
