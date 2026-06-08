@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\V1\CompanyController;
 use App\Http\Controllers\Api\V1\SellerController;
 use App\Http\Controllers\Api\V1\SellerAdminController;
 use App\Http\Controllers\Api\V1\FavoriteController;
+use App\Http\Controllers\Api\V1\QuestionController;
 use App\Http\Controllers\Api\V1\SubcategoryController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\PermissionController;
@@ -51,6 +52,9 @@ Route::prefix('v1')->group(function () {
     Route::get('public/companies/{company:slug}', [PublicCatalogController::class, 'company'])->name('public.company');
     // Webhook de MercadoPago (lo llama MP, sin token)
     Route::post('webhooks/mercadopago', [PaymentController::class, 'webhook'])->name('webhooks.mercadopago');
+
+    // Preguntas públicas de un producto (storefront)
+    Route::get('public/products/{product:slug}/questions', [QuestionController::class, 'publicIndex'])->name('public.product.questions');
 
     // Blog público (storefront)
     Route::get('blog', [PostController::class, 'publicIndex'])->name('blog.index');
@@ -109,6 +113,11 @@ Route::prefix('v1')->group(function () {
         Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
         Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
         Route::apiResource('currencies', CurrencyController::class);
+
+        // Preguntas (Q&A)
+        Route::post('products/{product}/questions', [QuestionController::class, 'store'])->name('products.questions.store');
+        Route::get('seller/questions', [QuestionController::class, 'sellerIndex'])->name('seller.questions');
+        Route::post('questions/{question}/answer', [QuestionController::class, 'answer'])->name('questions.answer');
 
         // Favoritos (wishlist del usuario)
         Route::get('favorites', [FavoriteController::class, 'index'])->name('favorites.index');

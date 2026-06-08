@@ -56,6 +56,8 @@ class PermissionsTableSeeder extends Seeder
             'companies.index', 'companies.show', 'companies.edit', 'companies.create', 'companies.destroy',
             // Vendedores (moderación KYC)
             'sellers.index', 'sellers.approve',
+            // Preguntas (Q&A)
+            'questions.index', 'questions.answer',
             // Acciones varias
             'upload.purchases',
             'change.status.products', 'change.status.purchases', 'change.status.sales',
