@@ -52,6 +52,8 @@ Route::prefix('v1')->group(function () {
     // Público
     Route::post('login', [AuthController::class, 'login'])->name('api.login');
     Route::post('register', [AuthController::class, 'register'])->name('api.register');
+    Route::post('forgot-password', [\App\Http\Controllers\Api\V1\PasswordResetController::class, 'forgot'])->name('password.forgot');
+    Route::post('reset-password', [\App\Http\Controllers\Api\V1\PasswordResetController::class, 'reset'])->name('password.reset');
 
     // Catálogo público (storefront)
     Route::get('public/products', [PublicCatalogController::class, 'products'])->name('public.products');
