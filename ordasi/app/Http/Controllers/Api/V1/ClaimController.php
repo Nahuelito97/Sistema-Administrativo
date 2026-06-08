@@ -43,6 +43,8 @@ class ClaimController extends Controller
             'reason'     => $data['reason'],
         ]);
 
+        \App\Notification::notifyCompany($order->company_id, 'claim', 'Nuevo reclamo', "Pedido #{$order->id}: " . ($data['type'] === 'refund' ? 'devolución' : 'cancelación'), '/reclamos');
+
         return (new ClaimResource($claim->load('order', 'company')))->response()->setStatusCode(201);
     }
 

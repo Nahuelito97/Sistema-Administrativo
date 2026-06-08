@@ -72,6 +72,13 @@ class ChatController extends Controller
         ]);
         $conversation->update(['last_message_at' => now()]);
 
+        // Notifica al otro lado: si escribe el comprador → a la tienda; si la tienda → al comprador.
+        if ($request->user()->id === $conversation->buyer_id) {
+            \App\Notification::notifyCompany($conversation->company_id, 'message', 'Nuevo mensaje', "Pedido #{$conversation->order_id}", '/mensajes');
+        } else {
+            \App\Notification::notify($conversation->buyer_id, 'message', 'Nuevo mensaje del vendedor', "Pedido #{$conversation->order_id}", '/mi-cuenta');
+        }
+
         return (new MessageResource($message->load('sender')))->response()->setStatusCode(201);
     }
 }

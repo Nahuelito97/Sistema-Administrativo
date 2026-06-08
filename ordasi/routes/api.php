@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\V1\QuestionController;
 use App\Http\Controllers\Api\V1\VariantController;
 use App\Http\Controllers\Api\V1\ChatController;
 use App\Http\Controllers\Api\V1\ClaimController;
+use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\SubcategoryController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\PermissionController;
@@ -121,6 +122,11 @@ Route::prefix('v1')->group(function () {
         Route::post('products/{product}/questions', [QuestionController::class, 'store'])->name('products.questions.store');
         Route::get('seller/questions', [QuestionController::class, 'sellerIndex'])->name('seller.questions');
         Route::post('questions/{question}/answer', [QuestionController::class, 'answer'])->name('questions.answer');
+
+        // Notificaciones in-app
+        Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::post('notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+        Route::post('notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
 
         // Reclamos (cancelaciones / devoluciones)
         Route::post('orders/{order}/claims', [ClaimController::class, 'store'])->name('orders.claims.store');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Concerns\ScopesToSeller;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
+use App\Notification;
 use App\Order;
 use App\ShoppingCart;
 use App\User;
@@ -80,6 +81,7 @@ class OrderController extends Controller
                     // Descontar stock de la variante o del producto.
                     $d->variant ? $d->variant->decrement('stock', $d->quantity) : $d->product->decrement('stock', $d->quantity);
                 }
+                Notification::notifyCompany($companyId, 'sale', 'Nueva venta', "Pedido #{$order->id} por $" . number_format($order->total, 2), '/orders');
                 $created->push($order);
             }
 

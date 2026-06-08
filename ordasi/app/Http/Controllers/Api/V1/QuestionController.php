@@ -41,6 +41,8 @@ class QuestionController extends Controller
             'question' => $data['question'],
         ]);
 
+        \App\Notification::notifyCompany($product->company_id, 'question', 'Nueva pregunta', \Illuminate\Support\Str::limit($product->name . ': ' . $data['question'], 120), '/preguntas');
+
         return (new QuestionResource($question->load('user')))->response()->setStatusCode(201);
     }
 
