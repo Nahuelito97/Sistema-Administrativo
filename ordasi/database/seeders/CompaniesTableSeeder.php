@@ -23,6 +23,7 @@ class CompaniesTableSeeder extends Seeder
             'companies.show', 'companies.edit',
             'orders.index', 'orders.show', 'orders.edit',
             'questions.index', 'questions.answer',
+            'claims.index', 'claims.resolve',
             'reports.day', 'reports.date',
         ];
         $vendedor->syncPermissions(

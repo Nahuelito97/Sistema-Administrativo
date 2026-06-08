@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\V1\FavoriteController;
 use App\Http\Controllers\Api\V1\QuestionController;
 use App\Http\Controllers\Api\V1\VariantController;
 use App\Http\Controllers\Api\V1\ChatController;
+use App\Http\Controllers\Api\V1\ClaimController;
 use App\Http\Controllers\Api\V1\SubcategoryController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\PermissionController;
@@ -120,6 +121,12 @@ Route::prefix('v1')->group(function () {
         Route::post('products/{product}/questions', [QuestionController::class, 'store'])->name('products.questions.store');
         Route::get('seller/questions', [QuestionController::class, 'sellerIndex'])->name('seller.questions');
         Route::post('questions/{question}/answer', [QuestionController::class, 'answer'])->name('questions.answer');
+
+        // Reclamos (cancelaciones / devoluciones)
+        Route::post('orders/{order}/claims', [ClaimController::class, 'store'])->name('orders.claims.store');
+        Route::get('my-claims', [ClaimController::class, 'myClaims'])->name('claims.mine');
+        Route::get('claims', [ClaimController::class, 'index'])->name('claims.index');
+        Route::patch('claims/{claim}/resolve', [ClaimController::class, 'resolve'])->name('claims.resolve');
 
         // Chat comprador <-> vendedor (una conversación por orden)
         Route::get('conversations', [ChatController::class, 'index'])->name('conversations.index');

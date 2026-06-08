@@ -58,6 +58,8 @@ class PermissionsTableSeeder extends Seeder
             'sellers.index', 'sellers.approve',
             // Preguntas (Q&A)
             'questions.index', 'questions.answer',
+            // Reclamos (cancelaciones/devoluciones)
+            'claims.index', 'claims.resolve',
             // Acciones varias
             'upload.purchases',
             'change.status.products', 'change.status.purchases', 'change.status.sales',
