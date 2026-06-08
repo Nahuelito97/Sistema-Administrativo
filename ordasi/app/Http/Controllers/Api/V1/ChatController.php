@@ -64,12 +64,19 @@ class ChatController extends Controller
     public function send(Request $request, Conversation $conversation)
     {
         abort_unless($conversation->isParticipant($request->user()), 403);
-        $data = $request->validate(['body' => ['required', 'string', 'max:2000']]);
-
-        $message = $conversation->messages()->create([
-            'sender_id' => $request->user()->id,
-            'body'      => $data['body'],
+        $request->validate([
+            'body'       => ['nullable', 'string', 'max:2000', 'required_without:attachment'],
+            'attachment' => ['nullable', 'file', 'max:8192', 'required_without:body'],
         ]);
+
+        $payload = ['sender_id' => $request->user()->id, 'body' => $request->input('body')];
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
+            $payload['attachment_path'] = $file->store('chat', 'public');
+            $payload['attachment_name'] = $file->getClientOriginalName();
+        }
+
+        $message = $conversation->messages()->create($payload);
         $conversation->update(['last_message_at' => now()]);
 
         // Notifica al otro lado: si escribe el comprador → a la tienda; si la tienda → al comprador.
