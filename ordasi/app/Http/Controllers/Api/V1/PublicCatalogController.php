@@ -39,11 +39,18 @@ class PublicCatalogController extends Controller
         if ($max = $request->query('max_price')) {
             $query->where('sell_price', '<=', $max);
         }
+        if ($minRating = $request->query('min_rating')) {
+            $query->whereRaw(
+                '(select coalesce(avg(rating), 0) from ratings where ratings.rateable_id = products.id and ratings.rateable_type = ?) >= ?',
+                [Product::class, (float) $minRating]
+            );
+        }
 
         match ($request->query('sort')) {
             'price_asc'  => $query->orderBy('sell_price'),
             'price_desc' => $query->orderByDesc('sell_price'),
             'name'       => $query->orderBy('name'),
+            'newest'     => $query->latest(),
             default      => $query->latest(),
         };
 
