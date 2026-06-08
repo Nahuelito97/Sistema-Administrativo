@@ -60,6 +60,8 @@ Route::prefix('v1')->group(function () {
     Route::get('public/products/{product:slug}', [PublicCatalogController::class, 'product'])->name('public.product');
     Route::get('public/products/{product:slug}/related', [PublicCatalogController::class, 'related'])->name('public.product.related');
     Route::get('public/most-viewed', [PublicCatalogController::class, 'mostViewed'])->name('public.most-viewed');
+    Route::get('public/newest', [PublicCatalogController::class, 'newest'])->name('public.newest');
+    Route::get('public/featured-stores', [PublicCatalogController::class, 'featuredStores'])->name('public.featured-stores');
     Route::get('public/offers', [OfferController::class, 'publicIndex'])->name('public.offers');
     Route::get('public/offers/{offer}', [OfferController::class, 'publicShow'])->name('public.offer');
     Route::get('public/categories', [PublicCatalogController::class, 'categories'])->name('public.categories');

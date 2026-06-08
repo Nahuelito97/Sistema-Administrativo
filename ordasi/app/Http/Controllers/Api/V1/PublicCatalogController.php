@@ -85,6 +85,24 @@ class PublicCatalogController extends Controller
         return ProductResource::collection($products);
     }
 
+    /** Novedades: últimos productos publicados. */
+    public function newest()
+    {
+        $products = Product::whereIn('visibility', ['SHOP', 'BOTH'])->where('status', 'ACTIVE')
+            ->with(['brand', 'company', 'promotions', 'images', 'offers'])
+            ->latest()->limit(8)->get();
+        return ProductResource::collection($products);
+    }
+
+    /** Tiendas destacadas: activas con más productos visibles. */
+    public function featuredStores()
+    {
+        $companies = Company::active()
+            ->withCount(['products' => fn ($q) => $q->whereIn('visibility', ['SHOP', 'BOTH'])->where('status', 'ACTIVE')])
+            ->orderByDesc('products_count')->limit(6)->get();
+        return CompanyResource::collection($companies);
+    }
+
     public function categories()
     {
         return CategoryResource::collection(\App\Category::orderBy('name')->get());
