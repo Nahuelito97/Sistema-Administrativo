@@ -47,6 +47,20 @@ class Product extends Model
         return $this->belongsToMany(Caracteristic::class, 'product_caracteristic')->withPivot('value');
     }
 
+    public function offers()
+    {
+        return $this->belongsToMany(Offer::class, 'offer_product');
+    }
+
+    /** Oferta/evento vigente (la primera). */
+    public function getActiveOfferAttribute()
+    {
+        if (! $this->relationLoaded('offers')) {
+            return null;
+        }
+        return $this->offers->first(fn ($o) => $o->isRunning());
+    }
+
     /** ¿El producto se vende por variantes? */
     public function getHasVariantsAttribute(): bool
     {

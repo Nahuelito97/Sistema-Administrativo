@@ -37,7 +37,7 @@ class OrderController extends Controller
     {
         $data = $request->validate(['shipping_address' => ['nullable', 'string', 'max:255']]);
 
-        $cart = ShoppingCart::with('details.product.promotions', 'details.variant')->where('user_id', $request->user()->id)->first();
+        $cart = ShoppingCart::with('details.product.promotions', 'details.product.offers', 'details.variant')->where('user_id', $request->user()->id)->first();
         if (! $cart || $cart->details->isEmpty()) {
             throw ValidationException::withMessages(['cart' => ['El carrito está vacío.']]);
         }
@@ -60,8 +60,14 @@ class OrderController extends Controller
 
             foreach ($groups as $companyId => $details) {
                 $unitPrice = fn ($d) => (float) ($d->variant->price ?? $d->product->sell_price);
-                // Subtotal por ítem aplicando la promo vigente (combo/mayorista/%/$).
-                $subtotal = fn ($d) => $d->product->promoSubtotal($d->quantity, $unitPrice($d));
+                // Subtotal: la oferta/evento tiene prioridad; si no, la promo del producto.
+                $subtotal = function ($d) use ($unitPrice) {
+                    $offer = $d->product->active_offer;
+                    if ($offer) {
+                        return round($d->quantity * $unitPrice($d) * (1 - (float) $offer->discount_percent / 100), 2);
+                    }
+                    return $d->product->promoSubtotal($d->quantity, $unitPrice($d));
+                };
                 $total = $details->sum($subtotal);
                 $order = Order::create([
                     'user_id'          => $request->user()->id,

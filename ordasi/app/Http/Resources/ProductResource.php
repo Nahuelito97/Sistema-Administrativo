@@ -40,6 +40,13 @@ class ProductResource extends JsonResource
             'discounted_price'  => $this->when($this->relationLoaded('promotions'), fn () => $this->discounted_price),
             'has_promotion'     => $this->has_promotion,
             'promo_label'       => $this->when($this->relationLoaded('promotions'), fn () => $this->promo_label),
+            'offer'             => $this->when($this->relationLoaded('offers') && $this->active_offer, fn () => [
+                'name'             => $this->active_offer->name,
+                'slug'             => $this->active_offer->slug,
+                'discount_percent' => $this->active_offer->discount_percent,
+                'ends_at'          => $this->active_offer->ends_at,
+                'offer_price'      => round((float) $this->sell_price * (1 - (float) $this->active_offer->discount_percent / 100), 2),
+            ]),
             'average_rating'    => $this->when($this->relationLoaded('ratings'), fn () => round((float) $this->ratings->avg('rating'), 1)),
             'ratings_count'     => $this->when($this->relationLoaded('ratings'), fn () => $this->ratings->count()),
             'created_at'        => $this->created_at,

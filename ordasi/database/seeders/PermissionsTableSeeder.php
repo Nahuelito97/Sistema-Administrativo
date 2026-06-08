@@ -27,6 +27,8 @@ class PermissionsTableSeeder extends Seeder
             'brands.index', 'brands.show', 'brands.edit', 'brands.create', 'brands.destroy',
             // Promociones
             'promotions.index', 'promotions.show', 'promotions.edit', 'promotions.create', 'promotions.destroy',
+            // Ofertas/eventos globales
+            'offers.index', 'offers.show', 'offers.edit', 'offers.create', 'offers.destroy',
             // Blog (posts) y etiquetas
             'posts.index', 'posts.show', 'posts.edit', 'posts.create', 'posts.destroy',
             'tags.index', 'tags.show', 'tags.edit', 'tags.create', 'tags.destroy',

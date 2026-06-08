@@ -19,7 +19,7 @@ class PublicCatalogController extends Controller
         $query = Product::query()
             ->whereIn('visibility', ['SHOP', 'BOTH'])
             ->where('status', 'ACTIVE')
-            ->with(['category', 'brand', 'company', 'promotions', 'images']);
+            ->with(['category', 'brand', 'company', 'promotions', 'images', 'offers']);
 
         if ($company = $request->query('company_id')) {
             $query->where('company_id', $company);

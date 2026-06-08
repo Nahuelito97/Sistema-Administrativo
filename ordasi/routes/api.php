@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\PublicCatalogController;
 use App\Http\Controllers\Api\V1\PostController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\PromotionController;
+use App\Http\Controllers\Api\V1\OfferController;
 use App\Http\Controllers\Api\V1\RatingController;
 use App\Http\Controllers\Api\V1\TagController;
 use App\Http\Controllers\Api\V1\BusinessController;
@@ -53,6 +54,8 @@ Route::prefix('v1')->group(function () {
     Route::get('public/products/{product:slug}', [PublicCatalogController::class, 'product'])->name('public.product');
     Route::get('public/products/{product:slug}/related', [PublicCatalogController::class, 'related'])->name('public.product.related');
     Route::get('public/most-viewed', [PublicCatalogController::class, 'mostViewed'])->name('public.most-viewed');
+    Route::get('public/offers', [OfferController::class, 'publicIndex'])->name('public.offers');
+    Route::get('public/offers/{offer}', [OfferController::class, 'publicShow'])->name('public.offer');
     Route::get('public/categories', [PublicCatalogController::class, 'categories'])->name('public.categories');
     Route::get('public/categories/tree', [CategoryController::class, 'tree'])->name('public.categories.tree');
     Route::get('public/categories/{category}/caracteristics', [CaracteristicController::class, 'index'])->name('public.category.caracteristics');
@@ -109,6 +112,7 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('subcategories', SubcategoryController::class);
         Route::apiResource('brands', BrandController::class);
         Route::apiResource('promotions', PromotionController::class);
+        Route::apiResource('offers', OfferController::class);
         Route::apiResource('providers', ProviderController::class);
         // Reseñas de producto
         Route::get('products/{product}/ratings', [RatingController::class, 'index'])->name('products.ratings.index');
