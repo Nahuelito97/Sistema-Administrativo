@@ -37,7 +37,7 @@ class OrderController extends Controller
     {
         $data = $request->validate(['shipping_address' => ['nullable', 'string', 'max:255']]);
 
-        $cart = ShoppingCart::with('details.product', 'details.variant')->where('user_id', $request->user()->id)->first();
+        $cart = ShoppingCart::with('details.product.promotions', 'details.variant')->where('user_id', $request->user()->id)->first();
         if (! $cart || $cart->details->isEmpty()) {
             throw ValidationException::withMessages(['cart' => ['El carrito está vacío.']]);
         }
@@ -60,7 +60,9 @@ class OrderController extends Controller
 
             foreach ($groups as $companyId => $details) {
                 $unitPrice = fn ($d) => (float) ($d->variant->price ?? $d->product->sell_price);
-                $total = $details->sum(fn ($d) => $d->quantity * $unitPrice($d));
+                // Subtotal por ítem aplicando la promo vigente (combo/mayorista/%/$).
+                $subtotal = fn ($d) => $d->product->promoSubtotal($d->quantity, $unitPrice($d));
+                $total = $details->sum($subtotal);
                 $order = Order::create([
                     'user_id'          => $request->user()->id,
                     'company_id'       => $companyId,
@@ -76,7 +78,8 @@ class OrderController extends Controller
                         'product_variant_id' => $d->product_variant_id,
                         'variant_name'       => $d->variant?->name,
                         'quantity'           => $d->quantity,
-                        'price'              => $unitPrice($d),
+                        // Precio unitario efectivo (subtotal con promo / cantidad).
+                        'price'              => round($subtotal($d) / max(1, $d->quantity), 2),
                     ]);
                     // Descontar stock de la variante o del producto.
                     $d->variant ? $d->variant->decrement('stock', $d->quantity) : $d->product->decrement('stock', $d->quantity);

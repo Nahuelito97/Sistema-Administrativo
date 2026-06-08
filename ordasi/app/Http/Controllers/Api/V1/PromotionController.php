@@ -58,11 +58,15 @@ class PromotionController extends Controller
     {
         return $request->validate([
             'name'                  => ['required', 'string', 'max:255'],
-            'promotion_type'        => ['required', 'in:percent,fixed_amount'],
+            'promotion_type'        => ['required', 'in:percent,fixed_amount,combo,wholesale'],
             'start_date'            => ['required', 'date'],
             'ending_date'           => ['required', 'date', 'after_or_equal:start_date'],
             'discount_rate'         => ['nullable', 'required_if:promotion_type,percent', 'numeric', 'min:0', 'max:100'],
             'fixed_amount_discount' => ['nullable', 'required_if:promotion_type,fixed_amount', 'numeric', 'min:0'],
+            'combo_buy'             => ['nullable', 'required_if:promotion_type,combo', 'integer', 'min:2'],
+            'combo_pay'             => ['nullable', 'required_if:promotion_type,combo', 'integer', 'min:1', 'lt:combo_buy'],
+            'wholesale_min_qty'     => ['nullable', 'required_if:promotion_type,wholesale', 'integer', 'min:2'],
+            'wholesale_price'       => ['nullable', 'required_if:promotion_type,wholesale', 'numeric', 'min:0'],
             'product_ids'           => ['array'],
             'product_ids.*'         => ['exists:products,id'],
         ]);

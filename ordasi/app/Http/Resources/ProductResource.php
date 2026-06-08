@@ -38,6 +38,7 @@ class ProductResource extends JsonResource
             'promotions'        => PromotionResource::collection($this->whenLoaded('promotions')),
             'discounted_price'  => $this->when($this->relationLoaded('promotions'), fn () => $this->discounted_price),
             'has_promotion'     => $this->has_promotion,
+            'promo_label'       => $this->when($this->relationLoaded('promotions'), fn () => $this->promo_label),
             'average_rating'    => $this->when($this->relationLoaded('ratings'), fn () => round((float) $this->ratings->avg('rating'), 1)),
             'ratings_count'     => $this->when($this->relationLoaded('ratings'), fn () => $this->ratings->count()),
             'created_at'        => $this->created_at,

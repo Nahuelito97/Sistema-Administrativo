@@ -122,4 +122,21 @@ class Product extends Model
     {
         return $this->relationLoaded('promotions') && $this->activePromotions()->isNotEmpty();
     }
+
+    /** Subtotal del ítem según cantidad, aplicando la promo vigente (combo/mayorista/%/$). */
+    public function promoSubtotal(int $qty, ?float $unitPrice = null): float
+    {
+        $unit = $unitPrice ?? (float) $this->sell_price;
+        $promo = $this->activePromotions()->first();
+        return $promo ? $promo->subtotalFor($unit, $qty) : round($qty * $unit, 2);
+    }
+
+    /** Etiqueta de la promo vigente (para la tienda), o null. */
+    public function getPromoLabelAttribute(): ?string
+    {
+        if (! $this->relationLoaded('promotions')) {
+            return null;
+        }
+        return $this->activePromotions()->first()?->label;
+    }
 }
