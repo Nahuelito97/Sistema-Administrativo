@@ -29,7 +29,7 @@ class UpdateRequest extends FormRequest
 
             'sell_price'=>'required',
             'category_id'=>'integer|required|exists:App\Category,id',
-            'provider_id'=>'integer|required|exists:App\Provider,id',
+            'provider_id'=>'integer|nullable|exists:App\Provider,id',
 
              'code'=>'nullable|string|max:8|min:8',
         ];

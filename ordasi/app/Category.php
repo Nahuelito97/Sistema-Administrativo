@@ -31,6 +31,11 @@ class Category extends Model
         return $this->hasMany(Category::class, 'parent_id');
     }
 
+    public function caracteristics()
+    {
+        return $this->hasMany(Caracteristic::class);
+    }
+
     /** Hijos cargados recursivamente (para el árbol). */
     public function childrenRecursive()
     {

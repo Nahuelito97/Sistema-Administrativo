@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\V1\RatingController;
 use App\Http\Controllers\Api\V1\TagController;
 use App\Http\Controllers\Api\V1\BusinessController;
 use App\Http\Controllers\Api\V1\CategoryController;
+use App\Http\Controllers\Api\V1\CaracteristicController;
 use App\Http\Controllers\Api\V1\CompanyController;
 use App\Http\Controllers\Api\V1\SellerController;
 use App\Http\Controllers\Api\V1\SellerAdminController;
@@ -54,6 +55,7 @@ Route::prefix('v1')->group(function () {
     Route::get('public/most-viewed', [PublicCatalogController::class, 'mostViewed'])->name('public.most-viewed');
     Route::get('public/categories', [PublicCatalogController::class, 'categories'])->name('public.categories');
     Route::get('public/categories/tree', [CategoryController::class, 'tree'])->name('public.categories.tree');
+    Route::get('public/categories/{category}/caracteristics', [CaracteristicController::class, 'index'])->name('public.category.caracteristics');
     Route::get('public/brands', [PublicCatalogController::class, 'brands'])->name('public.brands');
     // Tiendas del marketplace (storefront)
     Route::get('public/companies', [PublicCatalogController::class, 'companies'])->name('public.companies');
@@ -92,6 +94,10 @@ Route::prefix('v1')->group(function () {
         Route::get('sellers', [SellerAdminController::class, 'index'])->name('sellers.index');
         Route::get('sellers/{user}', [SellerAdminController::class, 'show'])->name('sellers.show');
         Route::patch('sellers/{user}/status', [SellerAdminController::class, 'updateStatus'])->name('sellers.status');
+
+        // Características por categoría (admin)
+        Route::post('categories/{category}/caracteristics', [CaracteristicController::class, 'store'])->name('caracteristics.store');
+        Route::delete('caracteristics/{caracteristic}', [CaracteristicController::class, 'destroy'])->name('caracteristics.destroy');
 
         // Tiendas (marketplace, admin)
         Route::post('companies/{company}/logo', [CompanyController::class, 'uploadLogo'])->name('companies.logo');

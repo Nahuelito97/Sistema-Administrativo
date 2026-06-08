@@ -35,6 +35,7 @@ class ProductResource extends JsonResource
             'images'            => ImageResource::collection($this->whenLoaded('images')),
             'variants'          => VariantResource::collection($this->whenLoaded('variants')),
             'has_variants'      => $this->when($this->relationLoaded('variants'), fn () => $this->variants->isNotEmpty()),
+            'caracteristics'    => $this->whenLoaded('caracteristics', fn () => $this->caracteristics->map(fn ($c) => ['id' => $c->id, 'name' => $c->name, 'value' => $c->pivot->value])),
             'promotions'        => PromotionResource::collection($this->whenLoaded('promotions')),
             'discounted_price'  => $this->when($this->relationLoaded('promotions'), fn () => $this->discounted_price),
             'has_promotion'     => $this->has_promotion,

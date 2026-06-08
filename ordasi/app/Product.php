@@ -42,6 +42,11 @@ class Product extends Model
         return $this->hasMany(ProductVariant::class);
     }
 
+    public function caracteristics()
+    {
+        return $this->belongsToMany(Caracteristic::class, 'product_caracteristic')->withPivot('value');
+    }
+
     /** ¿El producto se vende por variantes? */
     public function getHasVariantsAttribute(): bool
     {

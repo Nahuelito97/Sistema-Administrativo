@@ -17,7 +17,22 @@ class ProductController extends Controller
 {
     use ScopesToSeller;
 
-    public const RELATIONS = ['category', 'subcategory', 'provider', 'brand', 'company', 'images', 'variants', 'promotions', 'ratings.user'];
+    public const RELATIONS = ['category', 'subcategory', 'provider', 'brand', 'company', 'images', 'variants', 'caracteristics', 'promotions', 'ratings.user'];
+
+    /** Sincroniza los valores de características (product_caracteristic). */
+    private function syncCaracteristics(Product $product, Request $request): void
+    {
+        if (! $request->has('caracteristics')) {
+            return;
+        }
+        $sync = [];
+        foreach ($request->input('caracteristics', []) as $c) {
+            if (! empty($c['id'])) {
+                $sync[$c['id']] = ['value' => $c['value'] ?? null];
+            }
+        }
+        $product->caracteristics()->sync($sync);
+    }
 
     public function __construct()
     {
@@ -53,6 +68,8 @@ class ProductController extends Controller
             $product->update(['code' => str_pad($product->id, 8, '0', STR_PAD_LEFT)]);
         }
 
+        $this->syncCaracteristics($product, $request);
+
         return new ProductResource($product->load(self::RELATIONS));
     }
 
@@ -74,6 +91,7 @@ class ProductController extends Controller
             $data['slug'] = $this->uniqueSlug($request->name, $product->id);
         }
         $product->update($data);
+        $this->syncCaracteristics($product, $request);
         return new ProductResource($product->load(self::RELATIONS));
     }
 
