@@ -19,7 +19,11 @@ class PublicCatalogController extends Controller
         $query = Product::query()
             ->whereIn('visibility', ['SHOP', 'BOTH'])
             ->where('status', 'ACTIVE')
-            ->with(['category', 'brand', 'promotions', 'images']);
+            ->with(['category', 'brand', 'company', 'promotions', 'images']);
+
+        if ($company = $request->query('company_id')) {
+            $query->where('company_id', $company);
+        }
 
         if ($s = $request->query('search')) {
             $query->where('name', 'like', "%{$s}%");
@@ -52,7 +56,7 @@ class PublicCatalogController extends Controller
     {
         abort_unless(in_array($product->visibility, ['SHOP', 'BOTH']) && $product->status === 'ACTIVE', 404);
         $product->increment('views');
-        return new ProductResource($product->load(['category', 'subcategory', 'brand', 'images', 'promotions', 'ratings.user']));
+        return new ProductResource($product->load(['category', 'subcategory', 'brand', 'company', 'images', 'promotions', 'ratings.user']));
     }
 
     public function categories()
