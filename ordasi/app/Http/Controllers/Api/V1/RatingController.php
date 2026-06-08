@@ -16,13 +16,19 @@ class RatingController extends Controller
         );
     }
 
-    /** Un usuario reseña un producto (una reseña por usuario; se actualiza). */
+    /** Un usuario reseña un producto que compró (una reseña por usuario; se actualiza). */
     public function store(Request $request, Product $product)
     {
         $data = $request->validate([
             'rating'  => ['required', 'integer', 'min:1', 'max:5'],
             'comment' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        // Solo se puede reseñar lo que se compró.
+        $purchased = $request->user()->orders()
+            ->whereHas('details', fn ($q) => $q->where('product_id', $product->id))
+            ->exists();
+        abort_unless($purchased, 422, 'Solo podés reseñar productos que compraste.');
 
         $rating = $product->ratings()->updateOrCreate(
             ['user_id' => $request->user()->id],

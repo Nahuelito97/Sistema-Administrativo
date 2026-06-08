@@ -58,6 +58,20 @@ class Company extends Model
         return $this->banner ? Storage::disk('public')->url($this->banner) : null;
     }
 
+    /** Reputación de la tienda: promedio y cantidad de reseñas de sus productos. */
+    public function reputation(): array
+    {
+        $row = Rating::where('rateable_type', Product::class)
+            ->whereIn('rateable_id', $this->products()->pluck('id'))
+            ->selectRaw('AVG(rating) as avg, COUNT(*) as cnt')
+            ->first();
+
+        return [
+            'avg'   => $row && $row->cnt ? round((float) $row->avg, 1) : null,
+            'count' => (int) ($row->cnt ?? 0),
+        ];
+    }
+
     public function scopeSearch(Builder $query, ?string $term): Builder
     {
         return $term

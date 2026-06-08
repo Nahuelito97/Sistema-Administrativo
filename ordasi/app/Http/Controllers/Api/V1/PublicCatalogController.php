@@ -93,7 +93,7 @@ class PublicCatalogController extends Controller
             ->paginate(min((int) request()->query('per_page', 12) ?: 12, 60));
 
         return (new CompanyResource($company->loadCount('products')))
-            ->additional(['products' => [
+            ->additional(['reputation' => $company->reputation(), 'products' => [
                 'data' => ProductResource::collection($products->items()),
                 'meta' => [
                     'current_page' => $products->currentPage(),
