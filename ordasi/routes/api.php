@@ -51,6 +51,7 @@ Route::prefix('v1')->group(function () {
     Route::get('public/products', [PublicCatalogController::class, 'products'])->name('public.products');
     Route::get('public/products/{product:slug}', [PublicCatalogController::class, 'product'])->name('public.product');
     Route::get('public/categories', [PublicCatalogController::class, 'categories'])->name('public.categories');
+    Route::get('public/categories/tree', [CategoryController::class, 'tree'])->name('public.categories.tree');
     Route::get('public/brands', [PublicCatalogController::class, 'brands'])->name('public.brands');
     // Tiendas del marketplace (storefront)
     Route::get('public/companies', [PublicCatalogController::class, 'companies'])->name('public.companies');

@@ -11,8 +11,11 @@ class CategoryResource extends JsonResource
     {
         return [
             'id'          => $this->id,
+            'parent_id'   => $this->parent_id,
             'name'        => $this->name,
             'description' => $this->description,
+            'path'        => $this->when($this->relationLoaded('parent') || $this->parent_id === null, fn () => $this->path),
+            'children'    => CategoryResource::collection($this->whenLoaded('childrenRecursive')),
             'created_at'  => $this->created_at,
             'updated_at'  => $this->updated_at,
         ];
