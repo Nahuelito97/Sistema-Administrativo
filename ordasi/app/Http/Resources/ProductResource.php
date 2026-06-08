@@ -22,6 +22,7 @@ class ProductResource extends JsonResource
             'status'            => $this->status,
             'visibility'        => $this->visibility,
             'views'             => $this->views,
+            'best_seller'       => (bool) $this->best_seller,
             'category_id'       => $this->category_id,
             'subcategory_id'    => $this->subcategory_id,
             'provider_id'       => $this->provider_id,

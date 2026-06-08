@@ -39,6 +39,11 @@ class CartController extends Controller
         $product = Product::findOrFail($data['product_id']);
         $variantId = $data['product_variant_id'] ?? null;
 
+        // No podés comprar productos de tu propia tienda.
+        if ($product->company_id && $product->company_id === $request->user()->company_id) {
+            throw ValidationException::withMessages(['product_id' => ['No podés comprar productos de tu propia tienda.']]);
+        }
+
         // Si el producto tiene variantes, hay que elegir una; si no, no se acepta variante.
         if ($product->has_variants && ! $variantId) {
             throw ValidationException::withMessages(['product_variant_id' => ['Elegí una variante.']]);
