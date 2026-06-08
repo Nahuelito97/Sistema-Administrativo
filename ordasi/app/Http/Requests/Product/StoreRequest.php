@@ -31,6 +31,10 @@ class StoreRequest extends FormRequest
 
             'code'=>'nullable|string|max:8|min:8',
 
+            'category_id'=>'required|exists:categories,id',
+
+            'provider_id'=>'nullable|exists:providers,id',
+
 
         ];
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Image;
 use App\Product;
+use App\Http\Controllers\Concerns\ScopesToSeller;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Product\StoreRequest;
 use App\Http\Requests\Product\UpdateRequest;
@@ -14,6 +15,8 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
+    use ScopesToSeller;
+
     public const RELATIONS = ['category', 'subcategory', 'provider', 'brand', 'company', 'images', 'promotions', 'ratings.user'];
 
     public function __construct()
@@ -27,7 +30,7 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'provider', 'brand', 'promotions']);
+        $query = $this->scopeOwned(Product::with(['category', 'provider', 'brand', 'company', 'promotions']), $request);
         if ($s = $request->query('search')) {
             $query->where(fn ($q) => $q->where('name', 'like', "%{$s}%")->orWhere('code', 'like', "%{$s}%"));
         }
@@ -37,7 +40,14 @@ class ProductController extends Controller
 
     public function store(StoreRequest $request)
     {
-        $product = Product::create($request->all() + ['slug' => $this->uniqueSlug($request->name)]);
+        $data = $request->all() + ['slug' => $this->uniqueSlug($request->name)];
+
+        // El vendedor sólo puede crear productos en su propia tienda.
+        if ($companyId = $this->sellerCompanyId($request)) {
+            $data['company_id'] = $companyId;
+        }
+
+        $product = Product::create($data);
 
         if (! $request->filled('code')) {
             $product->update(['code' => str_pad($product->id, 8, '0', STR_PAD_LEFT)]);
@@ -46,14 +56,20 @@ class ProductController extends Controller
         return new ProductResource($product->load(self::RELATIONS));
     }
 
-    public function show(Product $product)
+    public function show(Request $request, Product $product)
     {
+        $this->assertOwned($product, $request);
         return new ProductResource($product->load(self::RELATIONS));
     }
 
     public function update(UpdateRequest $request, Product $product)
     {
+        $this->assertOwned($product, $request);
         $data = $request->all();
+        // El vendedor no puede mover el producto a otra tienda.
+        if ($this->sellerCompanyId($request)) {
+            unset($data['company_id']);
+        }
         if ($request->filled('name') && $request->name !== $product->name) {
             $data['slug'] = $this->uniqueSlug($request->name, $product->id);
         }
@@ -61,15 +77,17 @@ class ProductController extends Controller
         return new ProductResource($product->load(self::RELATIONS));
     }
 
-    public function destroy(Product $product)
+    public function destroy(Request $request, Product $product)
     {
+        $this->assertOwned($product, $request);
         $product->delete();
         return response()->json(null, 204);
     }
 
     /** Alterna ACTIVE / DEACTIVATED. */
-    public function changeStatus(Product $product)
+    public function changeStatus(Request $request, Product $product)
     {
+        $this->assertOwned($product, $request);
         $product->update(['status' => $product->status === 'ACTIVE' ? 'DEACTIVATED' : 'ACTIVE']);
         return new ProductResource($product->load(['category', 'provider', 'brand']));
     }
@@ -77,6 +95,7 @@ class ProductController extends Controller
     /** Sube una o varias imágenes a la galería del producto. */
     public function uploadImages(Request $request, Product $product)
     {
+        $this->assertOwned($product, $request);
         $request->validate([
             'images'   => ['required', 'array', 'min:1'],
             'images.*' => ['image', 'max:4096'],
@@ -91,8 +110,9 @@ class ProductController extends Controller
     }
 
     /** Elimina una imagen de la galería. */
-    public function deleteImage(Product $product, Image $image)
+    public function deleteImage(Request $request, Product $product, Image $image)
     {
+        $this->assertOwned($product, $request);
         if ($image->imageable_id !== $product->id || $image->imageable_type !== Product::class) {
             abort(404);
         }

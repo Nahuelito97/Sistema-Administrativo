@@ -69,6 +69,11 @@ Route::prefix('v1')->group(function () {
         // Quiero vender (onboarding del usuario autenticado)
         Route::get('seller/status', [SellerController::class, 'status'])->name('seller.status');
         Route::post('seller/apply', [SellerController::class, 'apply'])->name('seller.apply');
+        // Mi tienda (gestión por el vendedor)
+        Route::get('seller/shop', [SellerController::class, 'shop'])->name('seller.shop');
+        Route::put('seller/shop', [SellerController::class, 'updateShop'])->name('seller.shop.update');
+        Route::post('seller/shop/logo', [SellerController::class, 'uploadShopLogo'])->name('seller.shop.logo');
+        Route::post('seller/shop/banner', [SellerController::class, 'uploadShopBanner'])->name('seller.shop.banner');
 
         // Moderación de vendedores (admin)
         Route::get('sellers', [SellerAdminController::class, 'index'])->name('sellers.index');

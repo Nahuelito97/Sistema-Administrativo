@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Company;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CompanyResource;
 use App\Http\Resources\SellerResource;
 use App\User;
 use Illuminate\Http\Request;
@@ -71,6 +72,55 @@ class SellerController extends Controller
         });
 
         return (new SellerResource($seller))->additional(['can_sell' => $seller->canSell()]);
+    }
+
+    /** Mi tienda (la company del vendedor autenticado). */
+    public function shop(Request $request)
+    {
+        $company = $this->ownCompany($request);
+        return new CompanyResource($company->loadCount(['products', 'sellers']));
+    }
+
+    /** Actualizar datos de mi tienda. */
+    public function updateShop(Request $request)
+    {
+        $company = $this->ownCompany($request);
+        $data = $request->validate([
+            'name'           => ['required', 'string', 'max:255'],
+            'description'    => ['nullable', 'string'],
+            'cuit'           => ['nullable', 'string', 'max:20'],
+            'cond_iva'       => ['nullable', 'string', 'max:60'],
+            'email'          => ['nullable', 'email', 'max:255'],
+            'phone'          => ['nullable', 'string', 'max:40'],
+            'address'        => ['nullable', 'string', 'max:255'],
+            'social_network' => ['nullable', 'string', 'max:255'],
+        ]);
+        $company->update($data);
+        return new CompanyResource($company);
+    }
+
+    public function uploadShopLogo(Request $request)
+    {
+        $company = $this->ownCompany($request);
+        $request->validate(['logo' => ['required', 'image', 'max:2048']]);
+        $company->update(['logo' => $request->file('logo')->store('companies/logos', 'public')]);
+        return new CompanyResource($company);
+    }
+
+    public function uploadShopBanner(Request $request)
+    {
+        $company = $this->ownCompany($request);
+        $request->validate(['banner' => ['required', 'image', 'max:4096']]);
+        $company->update(['banner' => $request->file('banner')->store('companies/banners', 'public')]);
+        return new CompanyResource($company);
+    }
+
+    /** Devuelve la tienda del vendedor o 403/404 si no corresponde. */
+    private function ownCompany(Request $request): Company
+    {
+        $user = $request->user();
+        abort_unless($user->company_id, 404, 'No tenés una tienda.');
+        return Company::findOrFail($user->company_id);
     }
 
     private function uniqueSlug(string $name): string
