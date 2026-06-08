@@ -56,7 +56,7 @@ class PublicCatalogController extends Controller
     {
         abort_unless(in_array($product->visibility, ['SHOP', 'BOTH']) && $product->status === 'ACTIVE', 404);
         $product->increment('views');
-        return new ProductResource($product->load(['category', 'subcategory', 'brand', 'company', 'images', 'promotions', 'ratings.user']));
+        return new ProductResource($product->load(['category', 'subcategory', 'brand', 'company', 'images', 'variants', 'promotions', 'ratings.user']));
     }
 
     public function categories()

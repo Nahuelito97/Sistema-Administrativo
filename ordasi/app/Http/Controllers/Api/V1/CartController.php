@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CartResource;
+use App\Product;
+use App\ProductVariant;
 use App\ShoppingCart;
 use App\ShoppingCartDetail;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class CartController extends Controller
 {
@@ -17,7 +20,7 @@ class CartController extends Controller
 
     private function withItems(ShoppingCart $cart): CartResource
     {
-        return new CartResource($cart->load('details.product.brand'));
+        return new CartResource($cart->load('details.product.brand', 'details.variant'));
     }
 
     public function show(Request $request)
@@ -28,16 +31,40 @@ class CartController extends Controller
     public function addItem(Request $request)
     {
         $data = $request->validate([
-            'product_id' => ['required', 'exists:products,id'],
-            'quantity'   => ['sometimes', 'integer', 'min:1'],
+            'product_id'         => ['required', 'exists:products,id'],
+            'product_variant_id' => ['nullable', 'exists:product_variants,id'],
+            'quantity'           => ['sometimes', 'integer', 'min:1'],
         ]);
+
+        $product = Product::findOrFail($data['product_id']);
+        $variantId = $data['product_variant_id'] ?? null;
+
+        // Si el producto tiene variantes, hay que elegir una; si no, no se acepta variante.
+        if ($product->has_variants && ! $variantId) {
+            throw ValidationException::withMessages(['product_variant_id' => ['Elegí una variante.']]);
+        }
+        if ($variantId) {
+            $variant = ProductVariant::findOrFail($variantId);
+            if ($variant->product_id !== $product->id) {
+                throw ValidationException::withMessages(['product_variant_id' => ['La variante no pertenece al producto.']]);
+            }
+        }
+
         $cart = $this->cart($request);
         $qty = $data['quantity'] ?? 1;
-        $detail = $cart->details()->where('product_id', $data['product_id'])->first();
+        $detail = $cart->details()
+            ->where('product_id', $product->id)
+            ->where('product_variant_id', $variantId)
+            ->first();
+
         if ($detail) {
             $detail->increment('quantity', $qty);
         } else {
-            $cart->details()->create(['product_id' => $data['product_id'], 'quantity' => $qty]);
+            $cart->details()->create([
+                'product_id'         => $product->id,
+                'product_variant_id' => $variantId,
+                'quantity'           => $qty,
+            ]);
         }
         return $this->withItems($cart);
     }

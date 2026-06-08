@@ -37,6 +37,26 @@ class Product extends Model
         return $this->hasMany(Question::class);
     }
 
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+
+    /** ¿El producto se vende por variantes? */
+    public function getHasVariantsAttribute(): bool
+    {
+        return $this->variants()->exists();
+    }
+
+    /** Stock efectivo: suma de variantes si las hay, si no el stock propio. */
+    public function getEffectiveStockAttribute(): int
+    {
+        if ($this->relationLoaded('variants') && $this->variants->isNotEmpty()) {
+            return (int) $this->variants->sum('stock');
+        }
+        return $this->variants()->exists() ? (int) $this->variants()->sum('stock') : (int) $this->stock;
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class);

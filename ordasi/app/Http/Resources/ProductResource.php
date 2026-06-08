@@ -33,6 +33,8 @@ class ProductResource extends JsonResource
             'provider'          => new ProviderResource($this->whenLoaded('provider')),
             'brand'             => new BrandResource($this->whenLoaded('brand')),
             'images'            => ImageResource::collection($this->whenLoaded('images')),
+            'variants'          => VariantResource::collection($this->whenLoaded('variants')),
+            'has_variants'      => $this->when($this->relationLoaded('variants'), fn () => $this->variants->isNotEmpty()),
             'promotions'        => PromotionResource::collection($this->whenLoaded('promotions')),
             'discounted_price'  => $this->when($this->relationLoaded('promotions'), fn () => $this->discounted_price),
             'has_promotion'     => $this->has_promotion,

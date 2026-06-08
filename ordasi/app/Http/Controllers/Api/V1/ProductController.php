@@ -17,7 +17,7 @@ class ProductController extends Controller
 {
     use ScopesToSeller;
 
-    public const RELATIONS = ['category', 'subcategory', 'provider', 'brand', 'company', 'images', 'promotions', 'ratings.user'];
+    public const RELATIONS = ['category', 'subcategory', 'provider', 'brand', 'company', 'images', 'variants', 'promotions', 'ratings.user'];
 
     public function __construct()
     {

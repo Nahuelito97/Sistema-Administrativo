@@ -36,13 +36,19 @@ class OrderController extends Controller
     {
         $data = $request->validate(['shipping_address' => ['nullable', 'string', 'max:255']]);
 
-        $cart = ShoppingCart::with('details.product')->where('user_id', $request->user()->id)->first();
+        $cart = ShoppingCart::with('details.product', 'details.variant')->where('user_id', $request->user()->id)->first();
         if (! $cart || $cart->details->isEmpty()) {
             throw ValidationException::withMessages(['cart' => ['El carrito está vacío.']]);
         }
         foreach ($cart->details as $d) {
-            if (! $d->product || $d->product->stock < $d->quantity) {
-                throw ValidationException::withMessages(['stock' => ["Stock insuficiente para «{$d->product?->name}»."]]);
+            if (! $d->product) {
+                throw ValidationException::withMessages(['stock' => ['Un producto del carrito ya no existe.']]);
+            }
+            // El stock disponible sale de la variante si la hay, si no del producto.
+            $available = $d->variant ? $d->variant->stock : $d->product->stock;
+            if ($available < $d->quantity) {
+                $label = $d->product->name . ($d->variant ? " ({$d->variant->name})" : '');
+                throw ValidationException::withMessages(['stock' => ["Stock insuficiente para «{$label}»."]]);
             }
         }
 
@@ -52,7 +58,8 @@ class OrderController extends Controller
             $created = collect();
 
             foreach ($groups as $companyId => $details) {
-                $total = $details->sum(fn ($d) => $d->quantity * (float) $d->product->sell_price);
+                $unitPrice = fn ($d) => (float) ($d->variant->price ?? $d->product->sell_price);
+                $total = $details->sum(fn ($d) => $d->quantity * $unitPrice($d));
                 $order = Order::create([
                     'user_id'          => $request->user()->id,
                     'company_id'       => $companyId,
@@ -64,11 +71,14 @@ class OrderController extends Controller
                 ]);
                 foreach ($details as $d) {
                     $order->details()->create([
-                        'product_id' => $d->product_id,
-                        'quantity'   => $d->quantity,
-                        'price'      => $d->product->sell_price,
+                        'product_id'         => $d->product_id,
+                        'product_variant_id' => $d->product_variant_id,
+                        'variant_name'       => $d->variant?->name,
+                        'quantity'           => $d->quantity,
+                        'price'              => $unitPrice($d),
                     ]);
-                    $d->product->decrement('stock', $d->quantity);
+                    // Descontar stock de la variante o del producto.
+                    $d->variant ? $d->variant->decrement('stock', $d->quantity) : $d->product->decrement('stock', $d->quantity);
                 }
                 $created->push($order);
             }

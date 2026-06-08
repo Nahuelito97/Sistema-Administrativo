@@ -9,13 +9,17 @@ class CartItemResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $price = (float) ($this->product->sell_price ?? 0);
+        // El precio sale de la variante si la hay, si no del producto.
+        $price = (float) ($this->variant->price ?? $this->product->sell_price ?? 0);
         return [
-            'id'         => $this->id,
-            'product_id' => $this->product_id,
-            'quantity'   => $this->quantity,
-            'subtotal'   => round($this->quantity * $price, 2),
-            'product'    => new ProductResource($this->whenLoaded('product')),
+            'id'                 => $this->id,
+            'product_id'         => $this->product_id,
+            'product_variant_id' => $this->product_variant_id,
+            'variant_name'       => $this->variant?->name,
+            'unit_price'         => round($price, 2),
+            'quantity'           => $this->quantity,
+            'subtotal'           => round($this->quantity * $price, 2),
+            'product'            => new ProductResource($this->whenLoaded('product')),
         ];
     }
 }

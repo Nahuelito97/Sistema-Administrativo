@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\V1\SellerController;
 use App\Http\Controllers\Api\V1\SellerAdminController;
 use App\Http\Controllers\Api\V1\FavoriteController;
 use App\Http\Controllers\Api\V1\QuestionController;
+use App\Http\Controllers\Api\V1\VariantController;
 use App\Http\Controllers\Api\V1\SubcategoryController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\PermissionController;
@@ -131,6 +132,11 @@ Route::prefix('v1')->group(function () {
         Route::patch('products/{product}/status', [ProductController::class, 'changeStatus'])->name('products.status');
         Route::post('products/{product}/images', [ProductController::class, 'uploadImages'])->name('products.images.store');
         Route::delete('products/{product}/images/{image}', [ProductController::class, 'deleteImage'])->name('products.images.destroy');
+        // Variantes del producto (talle/color)
+        Route::get('products/{product}/variants', [VariantController::class, 'index'])->name('products.variants.index');
+        Route::post('products/{product}/variants', [VariantController::class, 'store'])->name('products.variants.store');
+        Route::patch('variants/{variant}', [VariantController::class, 'update'])->name('variants.update');
+        Route::delete('variants/{variant}', [VariantController::class, 'destroy'])->name('variants.destroy');
         Route::apiResource('products', ProductController::class);
 
         // Ventas y compras: solo listar, ver y crear (igual que el panel admin)
