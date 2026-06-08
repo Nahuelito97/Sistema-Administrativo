@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CompanyController;
 use App\Http\Controllers\Api\V1\SellerController;
 use App\Http\Controllers\Api\V1\SellerAdminController;
+use App\Http\Controllers\Api\V1\FavoriteController;
 use App\Http\Controllers\Api\V1\SubcategoryController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\PermissionController;
@@ -108,6 +109,11 @@ Route::prefix('v1')->group(function () {
         Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
         Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
         Route::apiResource('currencies', CurrencyController::class);
+
+        // Favoritos (wishlist del usuario)
+        Route::get('favorites', [FavoriteController::class, 'index'])->name('favorites.index');
+        Route::get('favorites/ids', [FavoriteController::class, 'ids'])->name('favorites.ids');
+        Route::post('favorites/toggle', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
 
         // Perfil del usuario autenticado
         Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
