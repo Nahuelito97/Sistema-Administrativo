@@ -54,6 +54,58 @@ class StatsController extends Controller
         ]);
     }
 
+    /** Ventas agrupadas por categoría (solo admin). */
+    public function salesByCategory(Request $request)
+    {
+        abort_unless($request->user()->hasRole('Admin'), 403);
+
+        $rows = OrderDetail::join('products', 'products.id', '=', 'order_details.product_id')
+            ->join('categories', 'categories.id', '=', 'products.category_id')
+            ->select('categories.name', DB::raw('SUM(order_details.quantity) as qty'), DB::raw('SUM(order_details.quantity * order_details.price) as total'))
+            ->groupBy('categories.id', 'categories.name')
+            ->orderByDesc('total')
+            ->limit(10)
+            ->get()
+            ->map(fn ($r) => ['name' => $r->name, 'qty' => (int) $r->qty, 'total' => round((float) $r->total, 2)]);
+
+        return response()->json(['data' => $rows]);
+    }
+
+    /** Estadísticas de una tienda puntual (solo admin). */
+    public function company(Request $request, Company $company)
+    {
+        abort_unless($request->user()->hasRole('Admin'), 403);
+
+        $orders = Order::where('company_id', $company->id);
+        $rep = $company->reputation();
+
+        $daily = collect(range(29, 0))->map(function ($i) use ($company) {
+            $date = Carbon::today()->subDays($i);
+            $total = Order::where('company_id', $company->id)->whereDate('order_date', $date)->sum('total');
+            return ['date' => $date->format('d/m'), 'total' => round((float) $total, 2)];
+        });
+
+        $topProducts = OrderDetail::join('orders', 'orders.id', '=', 'order_details.order_id')
+            ->where('orders.company_id', $company->id)
+            ->join('products', 'products.id', '=', 'order_details.product_id')
+            ->select('products.name', DB::raw('SUM(order_details.quantity) as qty'))
+            ->groupBy('products.id', 'products.name')->orderByDesc('qty')->limit(8)->get()
+            ->map(fn ($r) => ['name' => $r->name, 'qty' => (int) $r->qty]);
+
+        return response()->json([
+            'company' => ['id' => $company->id, 'name' => $company->name],
+            'kpis'    => [
+                'orders'     => (clone $orders)->count(),
+                'revenue'    => round((float) (clone $orders)->sum('total'), 2),
+                'products'   => $company->products()->count(),
+                'reputation' => $rep['avg'],
+                'reviews'    => $rep['count'],
+            ],
+            'daily'        => $daily->values(),
+            'top_products' => $topProducts,
+        ]);
+    }
+
     public function index()
     {
         $todaySales = Sale::whereDate('sale_date', Carbon::today())->get();

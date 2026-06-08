@@ -260,5 +260,7 @@ Route::prefix('v1')->group(function () {
         Route::get('stats', [StatsController::class, 'index'])->name('stats.index');
         Route::get('stats/sales-daily', [StatsController::class, 'salesDaily'])->name('stats.sales-daily');
         Route::get('stats/marketplace', [StatsController::class, 'marketplace'])->name('stats.marketplace');
+        Route::get('stats/sales-by-category', [StatsController::class, 'salesByCategory'])->name('stats.by-category');
+        Route::get('stats/companies/{company:id}', [StatsController::class, 'company'])->name('stats.company');
     });
 });
