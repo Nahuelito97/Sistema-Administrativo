@@ -24,6 +24,7 @@ class CompanyResource extends JsonResource
             'banner'         => $this->banner,
             'banner_url'     => $this->banner_url,
             'social_network' => $this->social_network,
+            'minimum_order_amount' => $this->minimum_order_amount,
             'status'         => $this->status,
             'products_count' => $this->whenCounted('products'),
             'sellers_count'  => $this->whenCounted('sellers'),

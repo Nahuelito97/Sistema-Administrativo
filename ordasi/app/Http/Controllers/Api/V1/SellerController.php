@@ -94,6 +94,7 @@ class SellerController extends Controller
             'phone'          => ['nullable', 'string', 'max:40'],
             'address'        => ['nullable', 'string', 'max:255'],
             'social_network' => ['nullable', 'string', 'max:255'],
+            'minimum_order_amount' => ['nullable', 'numeric', 'min:0'],
         ]);
         $company->update($data);
         return new CompanyResource($company);

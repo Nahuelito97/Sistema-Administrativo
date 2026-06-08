@@ -49,7 +49,7 @@ class OrderController extends Controller
             }
         }
 
-        $cart = ShoppingCart::with('details.product.promotions', 'details.product.offers', 'details.variant')->where('user_id', $request->user()->id)->first();
+        $cart = ShoppingCart::with('details.product.promotions', 'details.product.offers', 'details.product.company', 'details.variant')->where('user_id', $request->user()->id)->first();
         if (! $cart || $cart->details->isEmpty()) {
             throw ValidationException::withMessages(['cart' => ['El carrito está vacío.']]);
         }
@@ -81,6 +81,12 @@ class OrderController extends Controller
                     return $d->product->promoSubtotal($d->quantity, $unitPrice($d));
                 };
                 $total = $details->sum($subtotal);
+
+                // Mínimo de compra de la tienda.
+                $company = $details->first()->product->company;
+                if ($company && $company->minimum_order_amount && $total < (float) $company->minimum_order_amount) {
+                    throw ValidationException::withMessages(['minimum' => ["La tienda «{$company->name}» tiene un mínimo de compra de \$" . number_format($company->minimum_order_amount, 2) . '.']]);
+                }
                 $order = Order::create([
                     'user_id'          => $request->user()->id,
                     'company_id'       => $companyId,

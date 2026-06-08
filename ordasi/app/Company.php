@@ -23,6 +23,7 @@ class Company extends Model
         'logo',
         'banner',
         'social_network',
+        'minimum_order_amount',
         'status',
     ];
 
