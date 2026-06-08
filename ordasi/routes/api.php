@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\V1\VariantController;
 use App\Http\Controllers\Api\V1\ChatController;
 use App\Http\Controllers\Api\V1\ClaimController;
 use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\Api\V1\TicketController;
 use App\Http\Controllers\Api\V1\SubcategoryController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\PermissionController;
@@ -122,6 +123,14 @@ Route::prefix('v1')->group(function () {
         Route::post('products/{product}/questions', [QuestionController::class, 'store'])->name('products.questions.store');
         Route::get('seller/questions', [QuestionController::class, 'sellerIndex'])->name('seller.questions');
         Route::post('questions/{question}/answer', [QuestionController::class, 'answer'])->name('questions.answer');
+
+        // Tickets de soporte
+        Route::post('tickets', [TicketController::class, 'store'])->name('tickets.store');
+        Route::get('my-tickets', [TicketController::class, 'myTickets'])->name('tickets.mine');
+        Route::get('tickets', [TicketController::class, 'index'])->name('tickets.index');
+        Route::get('tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
+        Route::post('tickets/{ticket}/messages', [TicketController::class, 'reply'])->name('tickets.reply');
+        Route::patch('tickets/{ticket}/status', [TicketController::class, 'updateStatus'])->name('tickets.status');
 
         // Notificaciones in-app
         Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');

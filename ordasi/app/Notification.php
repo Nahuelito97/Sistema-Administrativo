@@ -23,6 +23,12 @@ class Notification extends Model
         static::create(['user_id' => $userId, 'type' => $type, 'title' => $title, 'body' => $body, 'link' => $link]);
     }
 
+    /** Notifica a todos los administradores. */
+    public static function notifyAdmins(string $type, string $title, ?string $body = null, ?string $link = null): void
+    {
+        User::role('Admin')->pluck('id')->each(fn ($uid) => static::notify($uid, $type, $title, $body, $link));
+    }
+
     /** Notifica a todos los vendedores de una tienda. */
     public static function notifyCompany(?int $companyId, string $type, string $title, ?string $body = null, ?string $link = null): void
     {
